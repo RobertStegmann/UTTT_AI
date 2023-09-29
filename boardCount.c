@@ -12,11 +12,11 @@ int main()
     {
         fprintf(stderr, "ERROR: errorCode = pthread_create() failed\n");
     }
-    errorCode = pthread_create(&topcentre_id, NULL, &countTopLeft, NULL);
+    errorCode = pthread_create(&topcentre_id, NULL, &countTopCentre, NULL);
     if (errorCode) {
         fprintf(stderr,"ERROR: errorCode = pthread_create() failed\n");
     }
-    errorCode = pthread_create(&centre_id, NULL, &countTopLeft, NULL);
+    errorCode = pthread_create(&centre_id, NULL, &countCentre, NULL);
     if (errorCode) {
         fprintf(stderr,"ERROR: errorCode = pthread_create() failed\n");
     }
@@ -48,7 +48,7 @@ void *countTopLeft(void *foo)
             threadCount++;
         }
     }
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 6; i++)
     {
         pthread_join(t_id[i], NULL);
     }
@@ -97,7 +97,7 @@ void *countCentre(void *foo)
     int errorCode;
     for (int i = 0; i < 3; i++)
     {
-        arg[i].board = 5;
+        arg[i].board = 4;
         errorCode = pthread_create((&t_id[i]), NULL, &countFromStartWrapper, (void *)(&arg[i]));
         if (errorCode)
         {
@@ -125,7 +125,7 @@ void countFromStart(int board, int row, int column)
     double moveCount = 1;
     playTurn(game, board, row, column);
     moveCount += countMoves(game);
-    printf("Possible moves from starting at %d,%d,%d: %.0f \n", board, row, column, moveCount);
+    printf("Possible boards from starting at %d,%d,%d: %.0f\n", board, row, column, moveCount);
 }
 
 /* Create a GameState struct */
@@ -430,7 +430,6 @@ Coord *chooseMoveFullBoard(GameState *game)
 
 Coord *chooseMoveSingleGrid(GameState *game, unsigned char board)
 {
-    //printf("chooseMoveSingleGrid()\n");
     Coord *possibleMoves = calloc(GRIDSIZE, sizeof(Coord));
     if (possibleMoves == NULL)
     {
@@ -442,17 +441,13 @@ Coord *chooseMoveSingleGrid(GameState *game, unsigned char board)
     {
         for (int j = 0; j < COL_DIMENSION; j++)
         {
-            //printf("Foo\n");
-            //printf("game->board[%d][%d][%d]: %d\n",board,i,j,game->board[board][i][j]);
             if (game->board[board][i][j] == 0)
             {
-                //printf("bar\n");
                 possibleMoves[arraySize].board = board;
                 possibleMoves[arraySize].row = i;
                 possibleMoves[arraySize].column = j;
                 arraySize++;
             }
-           //printf("baz\n");
         }
     }
     possibleMoves[arraySize].board = 10;

@@ -35,7 +35,7 @@ for i in range(0,3):
 for i in range(0,3):
     for j in range (0,2):
         startingBoard = g.GameState()
-        startingBoard.playTurn(0,i,j)
+        startingBoard.playTurn(1,i,j)
         countMoves(startingBoard)
         print("Possible moves from starting at 1," + i + "," + j + ":" + boardCount)
         boardCount = 0       
@@ -43,21 +43,21 @@ for i in range(0,3):
 # Centre
 
 startingBoard = g.GameState()
-startingBoard.playTurn(0,0,0)
+startingBoard.playTurn(4,0,0)
 countMoves(startingBoard)
-print("Possible moves from starting at 5,0,0:" + boardCount)
+print("Possible boards from starting at 4,0,0:" + boardCount)
 boardCount = 0
 
 startingBoard = g.GameState()
-startingBoard.playTurn(0,0,1)
+startingBoard.playTurn(4,0,1)
 countMoves(startingBoard)
-print("Possible moves from starting at 5,0,1:" + boardCount)
+print("Possible boards from starting at 4,0,1:" + boardCount)
 boardCount = 0   
 
 startingBoard = g.GameState()
-startingBoard.playTurn(0,1,1)
+startingBoard.playTurn(4,1,1)
 countMoves(startingBoard)
-print("Possible moves from starting at 5,1,1:" + boardCount)
+print("Possible boards from starting at 4,1,1:" + boardCount)
 boardCount = 0
 
 end = time.time()

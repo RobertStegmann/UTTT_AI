@@ -1,0 +1,16 @@
+Possible boards from starting at 0,0,0 after 9 moves: 243235991
+Possible boards from starting at 4,1,1 after 9 moves: 243038201
+Possible boards from starting at 1,0,1 after 9 moves: 243433781
+Possible boards from starting at 1,2,1 after 9 moves: 270392655
+Possible boards from starting at 0,2,1 after 9 moves: 266887515
+Possible boards from starting at 1,2,0 after 9 moves: 268024245
+Possible boards from starting at 0,1,1 after 9 moves: 272321775
+Possible boards from starting at 1,1,0 after 9 moves: 267002623
+Possible boards from starting at 0,2,2 after 9 moves: 271300045
+Possible boards from starting at 0,2,0 after 9 moves: 271300213
+Possible boards from starting at 4,0,0 after 9 moves: 271185489
+Possible boards from starting at 4,0,0 after 9 moves: 271185489
+Possible boards from starting at 0,1,0 after 9 moves: 270278483
+Possible boards from starting at 1,1,1 after 9 moves: 272436883
+Possible boards from starting at 1,0,0 after 9 moves: 271414769
+Execution time in seconds: 845

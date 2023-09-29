@@ -1,0 +1,15 @@
+Possible boards from starting at 4,1,1 after 11 moves: 15803263785 
+Possible boards from starting at 0,0,0 after 11 moves: 15835145659 
+Possible boards from starting at 1,0,1 after 11 moves: 15866981501 
+Possible boards from starting at 0,2,1 after 11 moves: 17525000081 
+Possible boards from starting at 1,1,0 after 11 moves: 17546014111 
+Possible boards from starting at 1,2,0 after 11 moves: 17743653425 
+Possible boards from starting at 1,2,1 after 11 moves: 18106367895 
+Possible boards from starting at 0,1,0 after 11 moves: 18086237375 
+Possible boards from starting at 4,0,0 after 11 moves: 18263902659 
+Possible boards from starting at 4,0,0 after 11 moves: 18263902659 
+Possible boards from starting at 0,2,0 after 11 moves: 18284045663 
+Possible boards from starting at 0,2,2 after 11 moves: 18283981963 
+Possible boards from starting at 1,0,0 after 11 moves: 18304119115 
+Possible boards from starting at 1,1,1 after 11 moves: 18501968183 
+Execution time in seconds: 54279

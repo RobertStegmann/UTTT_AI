@@ -1,0 +1,16 @@
+Possible boards from starting at 4,1,1 after 4 moves: 6081
+Possible boards from starting at 0,0,0 after 4 moves: 6081
+Possible boards from starting at 0,2,0 after 4 moves: 6677
+Possible boards from starting at 1,0,1 after 4 moves: 6081
+Possible boards from starting at 0,1,1 after 4 moves: 6677
+Possible boards from starting at 1,1,1 after 4 moves: 6677
+Possible boards from starting at 1,1,0 after 4 moves: 6677
+Possible boards from starting at 1,0,0 after 4 moves: 6677
+Possible boards from starting at 4,0,0 after 4 moves: 6677
+Possible boards from starting at 0,2,1 after 4 moves: 6677
+Possible boards from starting at 0,1,0 after 4 moves: 6677
+Possible boards from starting at 0,2,2 after 4 moves: 6677
+Possible boards from starting at 1,2,0 after 4 moves: 6677
+Possible boards from starting at 4,0,0 after 4 moves: 6677
+Possible boards from starting at 1,2,1 after 4 moves: 6677
+Execution time in seconds: 0

@@ -35,14 +35,24 @@ typedef struct {
     unsigned char board;
     unsigned char row;
     unsigned char column;
-} Coord; 
+} Coord;
 
+typedef struct {
+    int layers;
+    Coord coords;
+} Args;
 
 void * countTopLeft(void * foo);
 void * countTopCentre(void * foo);
 void * countCentre(void * foo);
 void * countFromStartWrapper(void * arg);
+void * countFromStartWrapperLayers(void * arg);
 void countFromStart(int board, int row, int column);
+void countFromStartLayers(int board, int row, int column, int layers);
+
+void * countTopLeftLayers(void * mLayers);
+void * countTopCentreLayers(void * mLayers);
+void * countCentreLayers(void * mLayers);
 
 GameState * createGameState();
 GameState * cloneGameState(GameState * game);
@@ -52,6 +62,7 @@ int isBoardWon (GameState * game, int board, int row, int column);
 int isGameWon(GameState * game, int board);
 int playTurn(GameState * game, int board, int row, int column);
 double countMoves(GameState *game);
+double countMovesLayers(GameState *game, int layers);
 Coord *chooseMoveFullBoard(GameState *game);
 Coord *chooseMoveSingleGrid(GameState *game, unsigned char board);
 

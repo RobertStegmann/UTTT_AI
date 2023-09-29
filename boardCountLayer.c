@@ -2,47 +2,54 @@
 
 //Ran at 10:28 2023-09-19
 
-int main()
+int main(int argc, char * argv[])
 {
-    pthread_t topleft_id;
-    pthread_t topcentre_id;
-    pthread_t centre_id;
-    int errorCode;
-    time_t begin = time(NULL);
-    errorCode = pthread_create(&topleft_id, NULL, &countTopLeft, NULL);
-    if (errorCode)
-    {
-        fprintf(stderr, "ERROR: errorCode = pthread_create() failed\n");
+    if (argc == 2) {
+        pthread_t topleft_id;
+        pthread_t topcentre_id;
+        pthread_t centre_id;
+        int errorCode;
+        int maxLayers = atoi(argv[1]);
+        time_t begin = time(NULL);
+        errorCode = pthread_create(&topleft_id, NULL, &countTopLeftLayers, (void *) &maxLayers);
+        if (errorCode)
+        {
+            fprintf(stderr, "ERROR: errorCode = pthread_create() failed\n");
+        }
+        errorCode = pthread_create(&topcentre_id, NULL, &countTopCentreLayers, (void *) &maxLayers);
+        if (errorCode) {
+            fprintf(stderr,"ERROR: errorCode = pthread_create() failed\n");
+        }
+        errorCode = pthread_create(&centre_id, NULL, &countCentreLayers, (void *) &maxLayers);
+        if (errorCode) {
+            fprintf(stderr,"ERROR: errorCode = pthread_create() failed\n");
+        }
+        pthread_join(topleft_id, NULL);
+        pthread_join(topcentre_id, NULL);
+        pthread_join(centre_id, NULL);
+        time_t end = time(NULL);
+        printf("Execution time in seconds: %d\n",(end-begin));
+    } else {
+        printf("Usage: ./boardCountLayer [number of layers]\n");
     }
-    errorCode = pthread_create(&topcentre_id, NULL, &countTopCentre, NULL);
-    if (errorCode) {
-        fprintf(stderr,"ERROR: errorCode = pthread_create() failed\n");
-    }
-    errorCode = pthread_create(&centre_id, NULL, &countCentre, NULL);
-    if (errorCode) {
-        fprintf(stderr,"ERROR: errorCode = pthread_create() failed\n");
-    }
-    pthread_join(topleft_id, NULL);
-    pthread_join(topcentre_id, NULL);
-    pthread_join(centre_id, NULL);
-    time_t end = time(NULL);
-    printf("Execution time in seconds: %d\n",(end-begin));
 }
 
-void *countTopLeft(void *foo)
+void *countTopLeftLayers(void * mLayers)
 {
     pthread_t t_id[6];
     int threadCount = 0;
-    Coord arg[6];
+    int maxLayers = *((int *)mLayers);
+    Args arg[6];
     int errorCode;
     for (int i = 0; i < 3; i++)
     {
         for (int j = 0; j <= i; j++)
         {
-            arg[threadCount].board = 0;
-            arg[threadCount].row = i;
-            arg[threadCount].column = j;
-            errorCode = pthread_create((&t_id[threadCount]), NULL, &countFromStartWrapper, (void *)(&arg[threadCount]));
+            arg[threadCount].coords.board = 0;
+            arg[threadCount].coords.row = i;
+            arg[threadCount].coords.column = j;
+            arg[threadCount].layers = maxLayers;
+            errorCode = pthread_create((&t_id[threadCount]), NULL, &countFromStartWrapperLayers, (void *)(&arg[threadCount]));
             if (errorCode)
             {
                 fprintf(stderr, "ERROR: errorCode = pthread_create() failed\n");
@@ -57,20 +64,22 @@ void *countTopLeft(void *foo)
     pthread_exit(NULL);
 }
 
-void *countTopCentre(void *foo)
+void *countTopCentreLayers(void * mLayers)
 {
     pthread_t t_id[6];
     int threadCount = 0;
-    Coord arg[6];
+    int maxLayers = *((int *)mLayers);
+    Args arg[6];
     int errorCode;
     for (int i = 0; i < 3; i++)
     {
         for (int j = 0; j < 2; j++)
         {
-            arg[threadCount].board = 1;
-            arg[threadCount].row = i;
-            arg[threadCount].column = j;
-            errorCode = pthread_create((&t_id[threadCount]), NULL, &countFromStartWrapper, (void *)(&arg[threadCount]));;
+            arg[threadCount].coords.board = 1;
+            arg[threadCount].coords.row = i;
+            arg[threadCount].coords.column = j;
+            arg[threadCount].layers = maxLayers;
+            errorCode = pthread_create((&t_id[threadCount]), NULL, &countFromStartWrapperLayers, (void *)(&arg[threadCount]));;
             if (errorCode)
             {
                 fprintf(stderr, "ERROR: errorCode = pthread_create() failed\n");
@@ -86,21 +95,23 @@ void *countTopCentre(void *foo)
     pthread_exit(NULL);
 }
 
-void *countCentre(void *foo)
+void *countCentreLayers(void * mLayers)
 {
     pthread_t t_id[3];
-    Coord arg[3];
-    arg[0].row = 0;
-    arg[0].column = 0;
-    arg[1].row = 0;
-    arg[1].column = 1;
-    arg[1].row = 1;
-    arg[1].column = 1;
+    int maxLayers = *((int *)mLayers);
+    Args arg[3];
+    arg[0].coords.row = 0;
+    arg[0].coords.column = 0;
+    arg[1].coords.row = 0;
+    arg[1].coords.column = 1;
+    arg[1].coords.row = 1;
+    arg[1].coords.column = 1;
     int errorCode;
     for (int i = 0; i < 3; i++)
     {
-        arg[i].board = 4;
-        errorCode = pthread_create((&t_id[i]), NULL, &countFromStartWrapper, (void *)(&arg[i]));
+        arg[i].coords.board = 4;
+        arg[i].layers = maxLayers;
+        errorCode = pthread_create((&t_id[i]), NULL, &countFromStartWrapperLayers, (void *)(&arg[i]));
         if (errorCode)
         {
             fprintf(stderr, "ERROR: errorCode = pthread_create() failed\n");
@@ -114,20 +125,20 @@ void *countCentre(void *foo)
     pthread_exit(NULL);
 }
 
-void *countFromStartWrapper(void *arg)
+void *countFromStartWrapperLayers(void *arg)
 {
-    Coord *coords = (Coord *)arg;
-    countFromStart(coords->board, coords->row, coords->column);
+    Args * arguments = (Args*)arg;
+    countFromStartLayers(arguments->coords.board, arguments->coords.row, arguments->coords.column,arguments->layers);
     pthread_exit(NULL);
 }
 
-void countFromStart(int board, int row, int column)
+void countFromStartLayers(int board, int row, int column, int layers)
 {
     GameState *game = createGameState();
     double moveCount = 1;
     playTurn(game, board, row, column);
-    moveCount += countMoves(game);
-    printf("Possible boards from starting at %d,%d,%d: %.0f\n", board, row, column, moveCount);
+    moveCount += countMovesLayers(game, layers-1);
+    printf("Possible boards from starting at %d,%d,%d after %d moves: %.0f\n", board, row, column, layers, moveCount);
 }
 
 /* Create a GameState struct */
@@ -334,8 +345,9 @@ int playTurn(GameState *game, int board, int row, int column)
     return NO_WIN;
 }
 
-double countMoves(GameState *game)
+double countMovesLayers(GameState *game, int layers)
 {
+    //printf("countMoves()\n");
     double moveCount = 0;
     Coord *possibleMoves;
     if (game->currentBoard == 9)
@@ -352,9 +364,9 @@ double countMoves(GameState *game)
         tempGame = cloneGameState(game);
         playTurn(tempGame, possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column);
         moveCount++;
-        if (tempGame->gameWon == 0)
+        if (tempGame->gameWon == 0 &&  0 < layers)
         {
-            moveCount += countMoves(tempGame);
+            moveCount += countMovesLayers(tempGame, layers - 1);
         }
         freeGameState(tempGame);
     }
