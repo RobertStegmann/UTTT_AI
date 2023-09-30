@@ -138,7 +138,7 @@ void countFromStartLayers(int board, int row, int column, int layers)
     double moveCount = 1;
     playTurn(game, board, row, column);
     moveCount += countMovesLayers(game, layers-1);
-    printf("Possible boards from starting at %d,%d,%d after %d moves: %.0f\n", board, row, column, layers, moveCount);
+    printf("Possible boards from starting at %d,%d,%d after %d moves: %.0f\n", board, row, column, (layers+1), moveCount);
 }
 
 /* Create a GameState struct */

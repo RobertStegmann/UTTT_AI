@@ -1,16 +1,16 @@
-Possible boards from starting at 1,0,1 after 7 moves: 3626201
-Possible boards from starting at 0,0,0 after 7 moves: 3625445
-Possible boards from starting at 0,2,0 after 7 moves: 3989735
-Possible boards from starting at 1,1,0 after 7 moves: 3969493
-Possible boards from starting at 4,0,0 after 7 moves: 3989367
-Possible boards from starting at 4,1,1 after 7 moves: 3624689
-Possible boards from starting at 1,0,0 after 7 moves: 3990103
-Possible boards from starting at 0,2,2 after 7 moves: 3989735
-Possible boards from starting at 4,0,0 after 7 moves: 3989367
-Possible boards from starting at 1,1,1 after 7 moves: 3993685
-Possible boards from starting at 0,1,0 after 7 moves: 3986153
-Possible boards from starting at 0,1,1 after 7 moves: 3993317
-Possible boards from starting at 1,2,1 after 7 moves: 3986521
-Possible boards from starting at 0,2,1 after 7 moves: 3969125
-Possible boards from starting at 1,2,0 after 7 moves: 3973075
-Execution time in seconds: 12
+Possible boards from starting at 4,1,1 after 8 moves: 3624689
+Possible boards from starting at 0,1,0 after 8 moves: 3986153
+Possible boards from starting at 0,0,0 after 8 moves: 3625445
+Possible boards from starting at 1,0,1 after 8 moves: 3626201
+Possible boards from starting at 1,2,1 after 8 moves: 3986521
+Possible boards from starting at 1,2,0 after 8 moves: 3973075
+Possible boards from starting at 0,2,1 after 8 moves: 3969125
+Possible boards from starting at 4,0,1 after 8 moves: 3985785
+Possible boards from starting at 1,1,1 after 8 moves: 3993685
+Possible boards from starting at 0,2,2 after 8 moves: 3989735
+Possible boards from starting at 0,1,1 after 8 moves: 3993317
+Possible boards from starting at 1,1,0 after 8 moves: 3969493
+Possible boards from starting at 0,2,0 after 8 moves: 3989735
+Possible boards from starting at 1,0,0 after 8 moves: 3990103
+Possible boards from starting at 4,0,0 after 8 moves: 3989367
+Execution time in seconds: 13
