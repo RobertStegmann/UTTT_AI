@@ -104,8 +104,8 @@ void *countCentreLayers(void * mLayers)
     arg[0].coords.column = 0;
     arg[1].coords.row = 0;
     arg[1].coords.column = 1;
-    arg[1].coords.row = 1;
-    arg[1].coords.column = 1;
+    arg[2].coords.row = 1;
+    arg[2].coords.column = 1;
     int errorCode;
     for (int i = 0; i < 3; i++)
     {

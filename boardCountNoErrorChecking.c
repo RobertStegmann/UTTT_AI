@@ -94,8 +94,8 @@ void *countCentre(void *foo)
     arg[0].column = 0;
     arg[1].row = 0;
     arg[1].column = 1;
-    arg[1].row = 1;
-    arg[1].column = 1;
+    arg[2].row = 1;
+    arg[2].column = 1;
     int errorCode;
     for (int i = 0; i < 3; i++)
     {
