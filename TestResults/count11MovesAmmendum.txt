@@ -1,1 +1,0 @@
-Possible boards from starting at 0,1,1 after 11 moves: 18481888099

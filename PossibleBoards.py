@@ -62,10 +62,3 @@ boardCount = 0
 
 end = time.time()
 print(end - start)
-
-
-
-
-
-
-

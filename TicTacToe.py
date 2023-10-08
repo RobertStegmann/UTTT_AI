@@ -1,5 +1,5 @@
 import GameState as g
-import RandomAI as r
+import TicTacToeAI as AI
 
 # Pygame UI is based on https://github.com/russs123/TicTacToe/blob/master/tictactoe.py
 
@@ -102,6 +102,8 @@ mousePosition = []
 # Run until user quits
 run = True 
 
+AIPlayer = AI.ChooseWinLose(0)
+
 while run:  
     # Event handlers
     for event in pygame.event.get():
@@ -132,11 +134,11 @@ while run:
                 if move != -1:                    
                     updateDraw()
     
-    #if game.gameWon == 0  and game.currentTurn == 2:
-    #    moveAI = r.RandomAI.chooseMove(game)
-    #    move = game.playTurn(moveAI[0],moveAI[1],moveAI[2])
-    #    if move != -1:                    
-    #        updateDraw()
+    if game.gameWon == 0 and game.currentTurn == 2:
+        moveAI = AIPlayer.chooseMove(game)
+        move = game.playTurn(moveAI[0],moveAI[1],moveAI[2])
+        if move != -1:                    
+            updateDraw()
             
             
     pygame.display.update()

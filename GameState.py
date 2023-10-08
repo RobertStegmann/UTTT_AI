@@ -7,14 +7,7 @@ class GameState:
         self.boardsWon = numpy.array(numpy.zeros(shape=(3,3),dtype=numpy.int8))
         self.currentBoard = 9
         self.currentTurn = 1 # 1 is player 1, 2 is player 2
-        self.gameWon = 0 # 0: game not won, 1 game is won, -1 stalemate
-        
-    #def __deepcopy__(self,game):
-    #    self.board = game.board
-    #    self.boardsWon = game.boardsWon
-    #    self.currentBoard = game.currentBoard
-    #    self.currentTurn = game.currentTurn # 1 is player 1, 2 is player 2
-    #    self.gameWon = game.gameWon
+        self.gameWon = 0 # 0: game not won, 1 game is won, -1 stalemate   
 
     def playTurn(self,board,row,column):
         if self.isValidMove(board,row,column): # If move is legal
@@ -121,8 +114,14 @@ class GameState:
                 if not self.board[self.currentBoard][i][j]:
                     possibleMoves.append((self.currentBoard,i,j))
         return possibleMoves      
-        
-            
+    
+    def getMoves(self):
+        if self.currentBoard == 9:
+            possibleMoves = self.chooseMoveFullBoard()
+        else:
+            possibleMoves = self.chooseMoveSingleGrid()
+        return possibleMoves
+                
             
 
         
