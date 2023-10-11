@@ -9,7 +9,7 @@ class GameState:
         self.currentTurn = 1 # 1 is player 1, 2 is player 2
         self.gameWon = 0 # 0: game not won, 1 game is won, -1 stalemate   
 
-    def playTurn(self,board,row,column):
+    def playTurn(self,board: int,row: int,column: int):
         if self.isValidMove(board,row,column): # If move is legal
             self.board[board,row,column] = self.currentTurn # Update board
             boardWin = self.isBoardWon(board,row,column)
@@ -40,7 +40,7 @@ class GameState:
         else: # If move is illegal
             return -1    
     
-    def isValidMove(self,board,row,column):
+    def isValidMove(self,board: int,row: int,column: int):
         if  board == self.currentBoard or self.currentBoard == 9:        
             if self.board[board,row,column]:
                 return False
@@ -52,7 +52,7 @@ class GameState:
         else:
             return False
     
-    def isBoardWon(self,board,row,column):
+    def isBoardWon(self,board: int,row: int,column: int):
         if self.board[board,row,0] == self.board[board,row,1] and self.board[board,row,1] == self.board[board,row,2]:
             return 1
         elif self.board[board,0,column] == self.board[board,1,column] and self.board[board,1,column] == self.board[board,2,column]:
