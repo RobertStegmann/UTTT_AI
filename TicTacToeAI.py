@@ -3,6 +3,7 @@ import random as r
 from abc import ABC, abstractmethod
 import copy
 import itertools
+import Heuristics as h
 
 class TicTacToeAI:
     @abstractmethod
@@ -146,4 +147,72 @@ class ChooseWinLose(TicTacToeAI):
             return badMoves[r.randrange(len(badMoves))]
         else:
             return losingMoves[r.randrange(len(losingMoves))]
-            
+
+class ChooseMinimax(TicTacToeAI):
+    
+    VICTORY_VALUE = 10000
+    
+    def  __init__(self,layers:int,heuristic:h.Heuristic):
+        self.layers = layers
+        self.heuristic = heuristic
+    
+    def chooseMove(self,game:g.GameState):
+        possibleMoves = game.getMoves()
+        r.shuffle(possibleMoves)
+        maximize = (game.currentTurn == 1)
+        bestMove = 0
+        bestEval = -self.VICTORY_VALUE if maximize else self.VICTORY_VALUE
+        i = 0
+        for move in possibleMoves:
+            tempGame = copy.deepcopy(game)
+            tempGame.playTurn(move[0],move[1],move[2])
+            eval = self.minimax(tempGame,self.layers-1,-self.VICTORY_VALUE,self.VICTORY_VALUE,not maximize)
+            if maximize and eval > bestEval:
+                bestMove = i
+                bestEval = eval
+            elif not maximize and eval < bestEval:
+                bestMove = i
+                bestEval = eval
+            i = i + 1
+        
+        return possibleMoves[bestMove]
+    
+    def toString(self):
+        return "ChooseMinimax: " + str(self.layers) + " Layers, " + self.heuristic.toString()
+    
+    # minimax is based on the pseudocode from https://www.youtube.com/watch?v=l-hh51ncgDI
+    def minimax(self,game:g.GameState,depth:int,alpha:int,beta:int,maximize:bool):
+        if game.gameWon != 0:
+            if game.gameWon == 1:
+                return self.VICTORY_VALUE
+            elif game.gameWon == 2:
+                return -self.VICTORY_VALUE
+            else:
+                return 0
+        elif depth == 0:
+            return self.heuristic.heuristic(game)
+        
+        if maximize:
+            maxEval = -self.VICTORY_VALUE 
+            possibleMoves = game.getMoves()
+            for move in possibleMoves:
+                tempGame = copy.deepcopy(game)
+                tempGame.playTurn(move[0],move[1],move[2])  
+                eval = self.minimax(tempGame,depth-1,alpha,beta,False)
+                maxEval = max(maxEval,eval)
+                alpha = max(alpha,eval)
+                if beta <= alpha:
+                    break
+            return maxEval
+        else:
+            minEval = self.VICTORY_VALUE 
+            possibleMoves = game.getMoves()
+            for move in possibleMoves:
+                tempGame = copy.deepcopy(game)
+                tempGame.playTurn(move[0],move[1],move[2])  
+                eval = self.minimax(tempGame,depth-1,alpha,beta,True)
+                minEval = min(minEval,eval)
+                beta = min(beta,eval)
+                if beta <= alpha:
+                    break
+            return minEval

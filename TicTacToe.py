@@ -1,5 +1,6 @@
 import GameState as g
 import TicTacToeAI as AI
+import Heuristics as h
 
 # Pygame UI is based on https://github.com/russs123/TicTacToe/blob/master/tictactoe.py
 
@@ -92,8 +93,10 @@ def drawMarkers():
 def updateDraw():
     drawBoard()
     drawMarkers()
+    pygame.display.update()
 
 drawBoard()
+pygame.display.update()
 
 click = False
 mousePosition = []
@@ -102,7 +105,7 @@ mousePosition = []
 # Run until user quits
 run = True 
 
-AIPlayer = AI.ChooseWinLose(0)
+AIPlayer = AI.ChooseMinimax(3,h.StaticHeuristic())
 
 while run:  
     # Event handlers
@@ -130,9 +133,10 @@ while run:
                 gridColumn = 9*(x % BOARD_HEIGHT) // SCREEN_WIDTH 
                 
                 move = game.playTurn(board,gridRow,gridColumn)
-                
+
                 if move != -1:                    
                     updateDraw()
+                    
     
     if game.gameWon == 0 and game.currentTurn == 2:
         moveAI = AIPlayer.chooseMove(game)
@@ -141,7 +145,6 @@ while run:
             updateDraw()
             
             
-    pygame.display.update()
         
         
 pygame.quit()

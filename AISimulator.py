@@ -1,7 +1,8 @@
 import GameState as g
 import TicTacToeAI as AI
 from prettytable import PrettyTable
-from time import process_time 
+from time import process_time
+import Heuristics as h 
 
 def simulateGames(AI_1:AI.TicTacToeAI, AI_2:AI.TicTacToeAI, gameNum=int):
     rounds = gameNum // 2
@@ -46,10 +47,19 @@ def simulateGames(AI_1:AI.TicTacToeAI, AI_2:AI.TicTacToeAI, gameNum=int):
         
         
 
-allAIs = []
-allAIs.append(AI.RandomAI())
-for i in range(0,64):
-    allAIs.append(AI.ChooseWinLose(i))
-for i in range(0,len(allAIs)):
-    for j in range(i+1,len(allAIs)):
-       simulateGames(allAIs[i],allAIs[j],1000) 
+# allAIs = []
+# allAIs.append(AI.RandomAI())
+# for i in range(0,64):
+#     allAIs.append(AI.ChooseWinLose(i))
+# for i in range(0,len(allAIs)):
+#     for j in range(i+1,len(allAIs)):
+#        simulateGames(allAIs[i],allAIs[j],1000)
+ 
+mimimaxAIThree = AI.ChooseMinimax(3,h.StaticHeuristic())
+mimimaxAITwo = AI.ChooseMinimax(2,h.StaticHeuristic())
+mimimaxAIOne= AI.ChooseMinimax(1,h.StaticHeuristic())
+chooseAI = AI.ChooseWinLose(0)
+simulateGames(mimimaxAIOne,chooseAI,1000)
+#simulateGames(mimimaxAIThree,chooseAI,1000)
+#simulateGames(mimimaxAITwo,mimimaxAIThree,1000)
+
