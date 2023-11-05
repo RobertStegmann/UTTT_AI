@@ -7,6 +7,7 @@
 #include <unistd.h> 
 #include <time.h>
 #include <string.h> 
+#include <stdbool.h>
 
 #define BOARDSIZE 81
 #define GRIDSIZE 9
@@ -17,19 +18,23 @@
 #define O_VAL 2
 
 #define OPEN_VAL 0
-#define STALEMATE -1
+#define STALEMATE 3
 #define GAME_WON 1
 #define NO_WIN 0
 #define ROW_DIMENSION 3
 #define COL_DIMENSION ROW_DIMENSION
+#define VICTORY_VALUE 10000
+
+#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
+#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
 typedef struct {
-    char *** board;
-    char ** boardsWon;
+    char board[9][ROW_DIMENSION][COL_DIMENSION];
+    char boardsWon[ROW_DIMENSION][COL_DIMENSION];
     unsigned char currentBoard;
     unsigned char currentTurn;
     char gameWon;
-} GameState;
+} CGameState;
 
 typedef struct {
     unsigned char board;
@@ -54,16 +59,26 @@ void * countTopLeftLayers(void * mLayers);
 void * countTopCentreLayers(void * mLayers);
 void * countCentreLayers(void * mLayers);
 
-GameState * createGameState();
-GameState * cloneGameState(GameState * game);
-void freeGameState(GameState * game);
-int isValidMove(GameState * game, int board, int row, int column);
-int isBoardWon (GameState * game, int board, int row, int column);
-int isGameWon(GameState * game, int board);
-int playTurn(GameState * game, int board, int row, int column);
-double countMoves(GameState *game);
-double countMovesLayers(GameState *game, int layers);
-Coord *chooseMoveFullBoard(GameState *game);
-Coord *chooseMoveSingleGrid(GameState *game, unsigned char board);
+CGameState * createCGameState();
+CGameState * cloneCGameState(CGameState * game);
+void freeCGameState(CGameState * game);
+int isValidMove(CGameState * game, int board, int row, int column);
+int isBoardWon (CGameState * game, int board, int row, int column);
+int isGameWon(CGameState * game, int board);
+int playTurn(CGameState * game, int board, int row, int column);
+double countMoves(CGameState *game);
+double countMovesLayers(CGameState *game, int layers);
+Coord *chooseMoveFullBoard(CGameState *game);
+Coord *chooseMoveSingleGrid(CGameState *game, unsigned char board);
 
+Coord * getMoves(CGameState *game);
+CGameState * copyCGameState(CGameState * copy, CGameState * original);
+
+int evaluateBoard(CGameState * game);
+int evaluateGrid(CGameState * game,int grid);
+int staticHeuristic(CGameState * game);
+int staticHeuristicWrapper(CGameState game);
+
+int minimax(CGameState * game, int depth, int alpha, int beta, bool maximize);
+int minimaxWrapper(CGameState game, int depth, int alpha, int beta, bool maximize);
 #endif

@@ -17,7 +17,7 @@ def simulateGames(AI_1:AI.TicTacToeAI, AI_2:AI.TicTacToeAI, gameNum=int):
     for r in range(0,2):
         for i in range(0,rounds):
             game = g.GameState()
-            while (game.gameWon == 0):
+            while (game.gameWon == g.NO_WIN):
                 if (game.currentTurn == 1):
                     t_start = process_time()  
                     moveAI = Player1.chooseMove(game)
@@ -30,8 +30,8 @@ def simulateGames(AI_1:AI.TicTacToeAI, AI_2:AI.TicTacToeAI, gameNum=int):
                     t_end = process_time()
                     game.playTurn(moveAI[0],moveAI[1],moveAI[2])  
                     runTime[r][1] = runTime[r][1] + t_end - t_start 
-            if (game.gameWon == 1):
-                wins[r][game.currentTurn - 1] = wins[r][game.currentTurn - 1] + 1
+            if (game.gameWon == g.GAME_WON):
+                wins[r][game.currentTurn - 1] += 1
             else:
                 stalemates = stalemates + 1
         Player1 = AI_2
@@ -54,12 +54,22 @@ def simulateGames(AI_1:AI.TicTacToeAI, AI_2:AI.TicTacToeAI, gameNum=int):
 # for i in range(0,len(allAIs)):
 #     for j in range(i+1,len(allAIs)):
 #        simulateGames(allAIs[i],allAIs[j],1000)
- 
+randomAI = AI.RandomAI()
+mimimaxAIFour = AI.ChooseMinimax(4,h.StaticHeuristic())
 mimimaxAIThree = AI.ChooseMinimax(3,h.StaticHeuristic())
 mimimaxAITwo = AI.ChooseMinimax(2,h.StaticHeuristic())
-mimimaxAIOne= AI.ChooseMinimax(1,h.StaticHeuristic())
+mimimaxAITwoC = AI.ChooseMinimax(2,h.StaticHeuristicC())
+minimaxCTwo = AI.ChooseMinimaxC(2)
+minimaxCFour = AI.ChooseMinimaxC(4)
+#mimimaxAIOne= AI.ChooseMinimax(1,h.StaticHeuristic())
 chooseAI = AI.ChooseWinLose(0)
-simulateGames(mimimaxAIOne,chooseAI,1000)
+# simulateGames(randomAI,mimimaxAIThree,100)
 #simulateGames(mimimaxAIThree,chooseAI,1000)
-#simulateGames(mimimaxAITwo,mimimaxAIThree,1000)
+#simulateGames(minimaxCTwo,mimimaxAITwoC,100)
+#simulateGames(mimimaxAITwo,mimimaxAITwoC,100)
+#simulateGames(mimimaxAITwo,minimaxCTwo,100)
+#simulateGames(mimimaxAITwo,chooseAI,100)
+simulateGames(randomAI,minimaxCTwo,100)
+simulateGames(randomAI,minimaxCFour,100)
+
 

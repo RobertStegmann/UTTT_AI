@@ -41,7 +41,7 @@ game = g.GameState()
 
 def drawBoard():
     screen.fill(BACKGROUND_COLOUR)
-    if game.gameWon == 0:
+    if game.gameWon == g.NO_WIN:
         drawCurrentBoard()
     for i in range (0,3):
         for j in range(1,3):
@@ -53,7 +53,7 @@ def drawBoard():
             
 def drawCurrentBoard():
     currentBoardColour = CURRENT_BOARD_X if game.currentTurn == 1 else CURRENT_BOARD_O
-    if game.currentBoard != 9:
+    if game.currentBoard != g.ANYBOARD:
        coord = g.GameState.boardToCoord(game.currentBoard)
        screen.fill(currentBoardColour,(coord[1]*BOARD_WIDTH,coord[0]*BOARD_HEIGHT,BOARD_WIDTH,BOARD_HEIGHT))
     else:
@@ -66,18 +66,18 @@ def drawMarkerGrid(board, row, column):
     coord = g.GameState.boardToCoord(board)
     screen_x = coord[1]*BOARD_WIDTH + column*GRID_WIDTH
     screen_y = coord[0]*BOARD_HEIGHT + row*GRID_HEIGHT
-    if game.board[board,row,column] == 1:
+    if game.board[board,row,column] == g.X_VAL:
         screen.blit(X_IMAGE,(screen_x,screen_y))  
-    elif game.board[board,row,column] == 2:
+    elif game.board[board,row,column] == g.O_VAL:
         screen.blit(O_IMAGE,(screen_x,screen_y))
         
 def drawMarkerBoard(board):
     coord = g.GameState.boardToCoord(board)
     screen_x = (coord[1]*BOARD_WIDTH)
     screen_y = (coord[0]*BOARD_HEIGHT)
-    if game.boardsWon[coord[0]][coord[1]] == 1:
+    if game.boardsWon[coord[0]][coord[1]] == g.X_VAL:
         screen.blit(X_IMAGE_LARGE,(screen_x,screen_y))
-    elif game.boardsWon[coord[0]][coord[1]] == 2:
+    elif game.boardsWon[coord[0]][coord[1]] == g.O_VAL:
         screen.blit(O_IMAGE_LARGE,(screen_x,screen_y))
     else:
        for i in range(0,3):
@@ -105,7 +105,7 @@ mousePosition = []
 # Run until user quits
 run = True 
 
-AIPlayer = AI.ChooseMinimax(3,h.StaticHeuristic())
+AIPlayer = AI.ChooseMinimaxC(4)
 
 while run:  
     # Event handlers
@@ -138,11 +138,12 @@ while run:
                     updateDraw()
                     
     
-    if game.gameWon == 0 and game.currentTurn == 2:
+    if game.gameWon == 0 :#and game.currentTurn == 2:
         moveAI = AIPlayer.chooseMove(game)
         move = game.playTurn(moveAI[0],moveAI[1],moveAI[2])
         if move != -1:                    
             updateDraw()
+            
             
             
         

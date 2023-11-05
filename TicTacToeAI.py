@@ -1,5 +1,6 @@
 import GameState as g
 import random as r
+import ctypes
 from abc import ABC, abstractmethod
 import copy
 import itertools
@@ -15,7 +16,7 @@ class TicTacToeAI:
         return "TicTacToeAI"
 
     def isWinBoard(game: g.GameState,board: int,row: int,column: int):
-        if (game.board[board,row,column] != 0):
+        if (game.board[board,row,column] != g.OPEN_VAL):
             return -2
         game.board[board,row,column] = game.currentTurn
         boardWin = game.isBoardWon(board,row,column)
@@ -26,8 +27,8 @@ class TicTacToeAI:
         boardWon = TicTacToeAI.isWinBoard(game,board,row,column)
         if (boardWon == -2):
             return -2
-        elif (boardWon == 0):
-            return 0
+        elif (boardWon == g.OPEN_VAL):
+            return g.NO_WIN
         tempGame = copy.deepcopy(game)
         tempGame.playTurn(board,row,column)
         return tempGame.gameWon
@@ -38,9 +39,9 @@ class TicTacToeAI:
         possibleMoves = newGame.getMoves()
         for move in possibleMoves:
             boardWin = TicTacToeAI.isWinBoard(newGame,move[0],move[1],move[2])
-            if (boardWin == 1):
-                return 1
-        return 0
+            if (boardWin == g.GAME_WON):
+                return g.GAME_WON
+        return g.NO_WIN
 
     def canOpponentWin(game: g.GameState,board: int,row: int,column: int):
         newGame = copy.deepcopy(game)
@@ -48,9 +49,9 @@ class TicTacToeAI:
         possibleMoves = newGame.getMoves()
         for move in possibleMoves:
             boardWin = TicTacToeAI.isWinningMove(newGame,move[0],move[1],move[2])
-            if (boardWin == 1):
-                return 1
-        return 0
+            if (boardWin == g.GAME_WON):
+                return g.GAME_WON
+        return g.NO_WIN
         
 
 class RandomAI(TicTacToeAI): 
@@ -182,7 +183,7 @@ class ChooseMinimax(TicTacToeAI):
     
     # minimax is based on the pseudocode from https://www.youtube.com/watch?v=l-hh51ncgDI
     def minimax(self,game:g.GameState,depth:int,alpha:int,beta:int,maximize:bool):
-        if game.gameWon != 0:
+        if game.gameWon != g.NO_WIN:
             if game.gameWon == 1:
                 return self.VICTORY_VALUE
             elif game.gameWon == 2:
@@ -216,3 +217,34 @@ class ChooseMinimax(TicTacToeAI):
                 if beta <= alpha:
                     break
             return minEval
+        
+class ChooseMinimaxC(TicTacToeAI):
+    
+    VICTORY_VALUE = 10000
+    
+    def  __init__(self,layers:int):
+        self.layers = layers
+    
+    def chooseMove(self,game:g.GameState):
+        possibleMoves = game.getMoves()
+        r.shuffle(possibleMoves)
+        maximize = (game.currentTurn == 1)
+        bestMove = 0
+        bestEval = -self.VICTORY_VALUE if maximize else self.VICTORY_VALUE
+        i = 0
+        for move in possibleMoves:
+            tempGame = copy.deepcopy(game)
+            tempGame.playTurn(move[0],move[1],move[2])
+            eval = g.clibrary.minimaxWrapper(tempGame.toCGameState(),self.layers-1,-self.VICTORY_VALUE,self.VICTORY_VALUE,not maximize)
+            if maximize and eval > bestEval:
+                bestMove = i
+                bestEval = eval
+            elif not maximize and eval < bestEval:
+                bestMove = i
+                bestEval = eval
+            i = i + 1
+        
+        return possibleMoves[bestMove]
+    
+    def toString(self):
+        return "ChooseMinimaxC: " + str(self.layers) + " Layer "
