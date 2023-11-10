@@ -25,6 +25,9 @@
 #define COL_DIMENSION ROW_DIMENSION
 #define VICTORY_VALUE 10000
 
+#define BOARD_VALUE 20
+#define GRID_VALUE 1
+
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 

@@ -105,7 +105,7 @@ mousePosition = []
 # Run until user quits
 run = True 
 
-AIPlayer = AI.ChooseMinimaxC(4)
+AIPlayer = AI.ChooseMinimaxC(6)
 
 while run:  
     # Event handlers
@@ -134,16 +134,15 @@ while run:
                 
                 move = game.playTurn(board,gridRow,gridColumn)
 
-                if move != -1:                    
+                if move != -1:            
                     updateDraw()
                     
-    
-    if game.gameWon == 0 :#and game.currentTurn == 2:
+    if game.gameWon == 0 and game.currentTurn == 2:
         moveAI = AIPlayer.chooseMove(game)
         move = game.playTurn(moveAI[0],moveAI[1],moveAI[2])
-        if move != -1:                    
+        if move != -1:                     
             updateDraw()
-            
+    
             
             
         

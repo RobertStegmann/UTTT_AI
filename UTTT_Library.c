@@ -1,12 +1,10 @@
 #include "boardCount.h"
 
-#define BOARD_VALUE 20
-#define GRID_VALUE 1
-
 int evaluateBoard(CGameState * game) {
     int evaluation = 0;
     int rcCount[6][3];
 
+    memset(rcCount,0,sizeof(int)*18);
     // Rows and columns
     for (int i = 0; i < ROW_DIMENSION; i++) {
         for (int j = 0; j < COL_DIMENSION; j++) {
@@ -24,7 +22,7 @@ int evaluateBoard(CGameState * game) {
             } else if (game->boardsWon[j][i] == STALEMATE) {
                 rcCount[i+ROW_DIMENSION][2]++;
             }
-        }        
+        }  
         if (rcCount[i][1] == 0 && rcCount[i][2] == 0){
             evaluation += BOARD_VALUE*rcCount[i][0]*rcCount[i][0];
         } else if (rcCount[i][0] == 0 && rcCount[i][2] == 0){
@@ -82,7 +80,7 @@ int evaluateBoard(CGameState * game) {
 int evaluateGrid(CGameState * game,int grid) {
     int evaluation = 0;
     int rcCount[6][2];
-
+    memset(rcCount,0,sizeof(int)*12);
     // Rows and columns
     for (int i = 0; i < ROW_DIMENSION; i++) {
         for (int j = 0; j < COL_DIMENSION; j++) {
@@ -96,7 +94,7 @@ int evaluateGrid(CGameState * game,int grid) {
             } else if (game->board[grid][j][i] == O_VAL) {   
                 rcCount[i+ROW_DIMENSION][1]++;
             }
-        }        
+        }     
         if (rcCount[i][1] == 0){
             evaluation += GRID_VALUE*rcCount[i][0]*rcCount[i][0];
         } else if (rcCount[i][0] == 0){
@@ -150,6 +148,7 @@ int staticHeuristic(CGameState * game) {
     int gridEval = 0;
     int r = 0;
     int c = 0;
+    int a = 2;
     int otherCoords[3][2] = {{1,2},{0,2},{0,1}};
     int upperRightDiagonal[3][2][2] = {{{1,1},{2,0}},
                                         {{0,2},{2,0}},
@@ -158,74 +157,73 @@ int staticHeuristic(CGameState * game) {
     int xCount = 0;
     int oCount = 0;
     int stalemateCount = 0;
-    for (int i = 0; i < 9; i++) {
-        r = (int)(i / ROW_DIMENSION);
-        c = i % COL_DIMENSION;
+    for (int grid = 0; grid < 9; grid++) {
+        r = (int)(grid / ROW_DIMENSION);
+        c = grid % COL_DIMENSION;
         if (game->boardsWon[r][c] == 0) {
-            gridEval = evaluateGrid(game,i);
-        }
+            gridEval = evaluateGrid(game,grid);
+            memset(rcCount,0,sizeof(int)*6);
 
-        for (int i = 0; i < 2; i++) {
-            if (game->boardsWon[r][otherCoords[c][i]] == X_VAL) {
-                rcCount[0][0]++;
-            } else if (game->boardsWon[r][otherCoords[c][i]] == O_VAL) {   
-                rcCount[0][1]++;
-            } else if (game->boardsWon[r][otherCoords[c][i]] == STALEMATE) {
-                rcCount[0][2]++;
+            for (int i = 0; i < 2; i++) {
+                if (game->boardsWon[r][otherCoords[c][i]] == X_VAL) {
+                    rcCount[0][0]++;
+                } else if (game->boardsWon[r][otherCoords[c][i]] == O_VAL) {   
+                    rcCount[0][1]++;
+                } else if (game->boardsWon[r][otherCoords[c][i]] == STALEMATE) {
+                    rcCount[0][2]++;
+                }
+                if (game->boardsWon[otherCoords[r][i]][c] == X_VAL) {
+                    rcCount[1][0]++;
+                } else if (game->boardsWon[otherCoords[r][i]][c] == O_VAL) {   
+                    rcCount[1][1]++;
+                } else if (game->boardsWon[otherCoords[r][i]][c] == STALEMATE) {
+                    rcCount[1][2]++;
+                } 
             }
-            if (game->boardsWon[otherCoords[r][i]][c] == X_VAL) {
-                rcCount[1][0]++;
-            } else if (game->boardsWon[otherCoords[r][i]][c] == O_VAL) {   
-                rcCount[1][1]++;
-            } else if (game->boardsWon[otherCoords[r][i]][c] == STALEMATE) {
-                rcCount[1][2]++;
-            }
-
             if (rcCount[0][2] == 0 && (rcCount[0][0] == 0 || rcCount[0][1] == 0)) {
                 evaluation += gridEval;
             }
-            if (rcCount[0][2] == 0 && (rcCount[0][0] == 0 || rcCount[0][1] == 0)) {
+            if (rcCount[1][2] == 0 && (rcCount[1][0] == 0 || rcCount[1][1] == 0)) {
                 evaluation += gridEval;
             }
-        }
 
-        if (r == c) {
-            xCount = 0;
-            oCount = 0;
-            stalemateCount = 0;
+            if (r == c) {
+                xCount = 0;
+                oCount = 0;
+                stalemateCount = 0;
 
-            for (int i = 0; i < 2; i++) {
-                if (game->boardsWon[otherCoords[r][i]][otherCoords[r][i]] == X_VAL) {
-                    xCount++;
-                } else if (game->boardsWon[otherCoords[r][i]][otherCoords[r][i]]  == O_VAL) {   
-                    oCount++;
-                } else if (game->boardsWon[otherCoords[r][i]][otherCoords[r][i]]  == STALEMATE) {
-                    stalemateCount++;
+                for (int i = 0; i < 2; i++) {  
+                    if (game->boardsWon[otherCoords[r][i]][otherCoords[r][i]] == X_VAL) {
+                        xCount++;
+                    } else if (game->boardsWon[otherCoords[r][i]][otherCoords[r][i]]  == O_VAL) {   
+                        oCount++;
+                    } else if (game->boardsWon[otherCoords[r][i]][otherCoords[r][i]]  == STALEMATE) {
+                        stalemateCount++;
+                    }
+                }
+
+                if (stalemateCount == 0 && (xCount == 0 || oCount == 0)) {
+                    evaluation += gridEval;
                 }
             }
 
-            if (stalemateCount == 0 && (xCount == 0 || oCount == 0)) {
-                evaluation += gridEval;
-            }
-        }
-
-        if ((r+c) == O_VAL) {
-            xCount = 0;
-            oCount = 0;
-            stalemateCount = 0;
-
-            for (int i = 0; i < 2; i++) {
-                if (game->boardsWon[upperRightDiagonal[r][i][0]][upperRightDiagonal[r][i][1]] == X_VAL) {
-                    xCount++;
-                } else if (game->boardsWon[upperRightDiagonal[r][i][0]][upperRightDiagonal[r][i][1]]  == O_VAL) {   
-                    oCount++;
-                } else if (game->boardsWon[upperRightDiagonal[r][i][0]][upperRightDiagonal[r][i][1]]  == STALEMATE) {
-                    stalemateCount++;
+            if ((r+c) == 2) {
+                xCount = 0;
+                oCount = 0;
+                stalemateCount = 0;
+                for (int i = 0; i < 2; i++) {
+                    if (game->boardsWon[upperRightDiagonal[r][i][0]][upperRightDiagonal[r][i][1]] == X_VAL) {
+                        xCount++;
+                    } else if (game->boardsWon[upperRightDiagonal[r][i][0]][upperRightDiagonal[r][i][1]]  == O_VAL) {   
+                        oCount++;
+                    } else if (game->boardsWon[upperRightDiagonal[r][i][0]][upperRightDiagonal[r][i][1]]  == STALEMATE) {
+                        stalemateCount++;
+                    }
                 }
-            }
 
-            if (stalemateCount == 0 && (xCount == 0 || oCount == 0)) {
-                evaluation += gridEval;
+                if (stalemateCount == 0 && (xCount == 0 || oCount == 0)) {
+                    evaluation += gridEval;
+                }
             }
         }
     }
@@ -283,6 +281,7 @@ int minimax(CGameState * game, int depth, int alpha, int beta, bool maximize) {
             }
         }
     }
+    free(possibleMoves);
     freeCGameState(tempGame);
     return bestEval;
 }

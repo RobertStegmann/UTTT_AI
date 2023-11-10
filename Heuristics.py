@@ -31,9 +31,9 @@ class Heuristic:
                     stalemateCount = stalemateCount + 1
                     
             if oCount == 0 and stalemateCount == 0:
-                evaluation = evaluation + BOARD_VALUE*xCount*xCount
+                evaluation += BOARD_VALUE*xCount*xCount
             elif xCount == 0 and stalemateCount == 0:
-                evaluation = evaluation - BOARD_VALUE*oCount*oCount
+                evaluation -= BOARD_VALUE*oCount*oCount
         
         # Columns
         for i in range(0,3):
@@ -49,9 +49,9 @@ class Heuristic:
                     stalemateCount = stalemateCount + 1
             
             if oCount == 0 and stalemateCount == 0:                
-                evaluation = evaluation + BOARD_VALUE*xCount*xCount
+                evaluation += BOARD_VALUE*xCount*xCount
             elif xCount == 0 and stalemateCount == 0:
-                evaluation = evaluation - BOARD_VALUE*oCount*oCount        
+                evaluation -= BOARD_VALUE*oCount*oCount        
     
         xCount = 0
         oCount = 0
@@ -65,7 +65,7 @@ class Heuristic:
                 stalemateCount += 1
         
         if oCount == 0 and stalemateCount == 0:
-            evaluation +=  BOARD_VALUE*xCount*xCount
+            evaluation += BOARD_VALUE*xCount*xCount
         elif xCount == 0 and stalemateCount == 0:
             evaluation -= BOARD_VALUE*oCount*oCount
             
@@ -83,7 +83,7 @@ class Heuristic:
             a -= 1
         
         if oCount == 0 and stalemateCount == 0:
-            evaluation +=  BOARD_VALUE*xCount*xCount
+            evaluation += BOARD_VALUE*xCount*xCount
         elif xCount == 0 and stalemateCount == 0:
             evaluation -= BOARD_VALUE*oCount*oCount      
                 
@@ -147,7 +147,7 @@ class Heuristic:
         if oCount == 0:
             evaluation += GRID_VALUE*xCount*xCount
         elif xCount == 0:
-            evaluation += GRID_VALUE*oCount*oCount      
+            evaluation -= GRID_VALUE*oCount*oCount      
                 
         return evaluation
     
@@ -155,10 +155,10 @@ class StaticHeuristic(Heuristic):
     def heuristic(self,game:g.GameState):
         evaluation = self.evaluateBoard(game)
         
-        for i in range(0,9):
-            coord = g.GameState.boardToCoord(i)
+        for grid in range(0,9):
+            coord = g.GameState.boardToCoord(grid)
             if game.boardsWon[coord[0],coord[1]] == g.OPEN_VAL:
-                gridEval = self.evaluateGrid(game,i)
+                gridEval = self.evaluateGrid(game,grid)
                 # Rows
                 if coord[1] == 0:
                     otherColumns = (1,2)
@@ -215,7 +215,7 @@ class StaticHeuristic(Heuristic):
                     oCount = 0
                     stalemateCount = 0
                     for i in upperLeftDiagonal:
-                        if game.boardsWon[i,i] == 1:
+                        if game.boardsWon[i,i] == g.X_VAL:
                             xCount += 1
                         elif game.boardsWon[i,i] == g.O_VAL:
                             oCount += 1
@@ -229,9 +229,9 @@ class StaticHeuristic(Heuristic):
                     if coord[0] == 0:
                         upperRightDiagonal = ((1,1),(2,0))
                     elif coord[0] == 1:
-                        upperRightDiagonal  = ((0,2),(2,0))
+                        upperRightDiagonal = ((0,2),(2,0))
                     else: 
-                        upperRightDiagonal  = ((0,2),(1,1))
+                        upperRightDiagonal = ((0,2),(1,1))
                        
                     xCount = 0
                     oCount = 0

@@ -55,21 +55,37 @@ def simulateGames(AI_1:AI.TicTacToeAI, AI_2:AI.TicTacToeAI, gameNum=int):
 #     for j in range(i+1,len(allAIs)):
 #        simulateGames(allAIs[i],allAIs[j],1000)
 randomAI = AI.RandomAI()
-mimimaxAIFour = AI.ChooseMinimax(4,h.StaticHeuristic())
-mimimaxAIThree = AI.ChooseMinimax(3,h.StaticHeuristic())
-mimimaxAITwo = AI.ChooseMinimax(2,h.StaticHeuristic())
-mimimaxAITwoC = AI.ChooseMinimax(2,h.StaticHeuristicC())
-minimaxCTwo = AI.ChooseMinimaxC(2)
-minimaxCFour = AI.ChooseMinimaxC(4)
-#mimimaxAIOne= AI.ChooseMinimax(1,h.StaticHeuristic())
-chooseAI = AI.ChooseWinLose(0)
-# simulateGames(randomAI,mimimaxAIThree,100)
-#simulateGames(mimimaxAIThree,chooseAI,1000)
-#simulateGames(minimaxCTwo,mimimaxAITwoC,100)
-#simulateGames(mimimaxAITwo,mimimaxAITwoC,100)
-#simulateGames(mimimaxAITwo,minimaxCTwo,100)
-#simulateGames(mimimaxAITwo,chooseAI,100)
-simulateGames(randomAI,minimaxCTwo,100)
-simulateGames(randomAI,minimaxCFour,100)
+chooseWinLose = AI.ChooseWinLose(0)
+
+minimaxTwo = AI.ChooseMinimax(2,h.StaticHeuristic())
+
+minimaxCHeurisitic = []
+
+for i in range(2,6):
+    minimaxCHeurisitic.append(AI.ChooseMinimax(i,h.StaticHeuristicC()))
+
+minimaxFullC = []
+
+for i in range(2,7):
+    minimaxFullC.append(AI.ChooseMinimaxC(i))
+    
+# for i in range(0,5):
+#     for j in range(i+1,5):
+#         simulateGames(minimaxFullC[i],minimaxFullC[j],1000)
+
+# simulateGames(randomAI,minimaxFullC[4],1000)
+# simulateGames(chooseWinLose,minimaxFullC[4],1000)
+
+simulateGames(minimaxTwo,minimaxCHeurisitic[0],1000)
+simulateGames(minimaxTwo,minimaxFullC[0],1000)
+
+for i in range(0,4):
+    simulateGames(minimaxFullC[i],minimaxCHeurisitic[i],1000)
+
+
+
+#simulateGames(minimaxAITwo,chooseAI,100)
+#simulateGames(randomAI,minimaxCTwo,100)
+#simulateGames(randomAI,minimaxCFour,100)
 
 

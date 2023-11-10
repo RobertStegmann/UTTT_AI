@@ -175,7 +175,6 @@ class ChooseMinimax(TicTacToeAI):
                 bestMove = i
                 bestEval = eval
             i = i + 1
-        
         return possibleMoves[bestMove]
     
     def toString(self):
@@ -243,7 +242,6 @@ class ChooseMinimaxC(TicTacToeAI):
                 bestMove = i
                 bestEval = eval
             i = i + 1
-        
         return possibleMoves[bestMove]
     
     def toString(self):

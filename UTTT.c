@@ -222,7 +222,7 @@ Coord *chooseMoveFullBoard(CGameState *game)
 
 Coord *chooseMoveSingleGrid(CGameState *game, unsigned char board)
 {
-    Coord *possibleMoves = calloc(GRIDSIZE, sizeof(Coord));
+    Coord *possibleMoves = calloc((GRIDSIZE+1), sizeof(Coord));
     int arraySize = 0;
     for (int i = 0; i < ROW_DIMENSION; i++)
     {
