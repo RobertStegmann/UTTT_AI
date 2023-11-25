@@ -8,6 +8,7 @@
 #include <time.h>
 #include <string.h> 
 #include <stdbool.h>
+#include <sys/random.h>
 
 #define BOARDSIZE 81
 #define GRIDSIZE 9
@@ -23,10 +24,12 @@
 #define NO_WIN 0
 #define ROW_DIMENSION 3
 #define COL_DIMENSION ROW_DIMENSION
-#define VICTORY_VALUE 10000
+#define VICTORY_VALUE 1000000
 
-#define BOARD_VALUE 20
-#define GRID_VALUE 1
+#define BOARD_VALUE 28
+#define GRID_VALUE 2
+#define PLAYABLE_VALUE 1
+
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
@@ -46,9 +49,22 @@ typedef struct {
 } Coord;
 
 typedef struct {
+    int moveNum;
+    Coord * moves;
+} MoveList;
+
+typedef struct {
     int layers;
     Coord coords;
 } Args;
+
+typedef struct {
+    int boardVal;
+    int gridVal;
+    int playableVal;
+    int maxRuns;
+    int index;
+} HeuristicVal;
 
 void * countTopLeft(void * foo);
 void * countTopCentre(void * foo);
@@ -77,11 +93,24 @@ Coord *chooseMoveSingleGrid(CGameState *game, unsigned char board);
 Coord * getMoves(CGameState *game);
 CGameState * copyCGameState(CGameState * copy, CGameState * original);
 
-int evaluateBoard(CGameState * game);
-int evaluateGrid(CGameState * game,int grid);
-int staticHeuristic(CGameState * game);
-int staticHeuristicWrapper(CGameState game);
+int evaluateBoard(CGameState * game,HeuristicVal * val);
+int evaluateGrid(CGameState * game,int grid,HeuristicVal * val);
 
-int minimax(CGameState * game, int depth, int alpha, int beta, bool maximize);
-int minimaxWrapper(CGameState game, int depth, int alpha, int beta, bool maximize);
+int staticHeuristic(CGameState * game, HeuristicVal * val);
+int staticHeuristicWrapper(CGameState game, HeuristicVal val);
+
+int minimax(CGameState * game, int depth, int alpha, int beta, bool maximize, int heuristic (CGameState *,HeuristicVal * val), HeuristicVal * val);
+int minimaxWrapper(CGameState game, int depth, int alpha, int beta, bool maximize, HeuristicVal val);
+
+int evaluateAndRecordBoard(CGameState * game, int * boardRelevance, HeuristicVal * val);
+int evaluateGridAndRecord(CGameState * game,int grid,bool * winnable, HeuristicVal * val);
+
+int playableBoardHeuristic(CGameState * game, HeuristicVal * val);
+int playableBoardHeuristicWrapper(CGameState game, HeuristicVal val);
+
+int randomMove(CGameState * game);
+int simulateGame(CGameState * game);
+
+int monteCarloHeuristic(CGameState * game, HeuristicVal * val);
+int monteCarloHeuristicWrapper(CGameState game,HeuristicVal val);
 #endif

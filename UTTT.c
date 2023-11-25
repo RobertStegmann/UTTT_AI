@@ -190,7 +190,7 @@ int playTurn(CGameState *game, int board, int row, int column)
 
 Coord *chooseMoveFullBoard(CGameState *game)
 {
-    Coord *possibleMoves = calloc(BOARDSIZE, sizeof(Coord));
+    Coord *possibleMoves = calloc(BOARDSIZE+1, sizeof(Coord));
     int currentBoard = 0;
     int arraySize = 0;
     for (int i = 0; i < ROW_DIMENSION; i++)
@@ -252,4 +252,39 @@ Coord * getMoves(CGameState *game) {
         possibleMoves = chooseMoveSingleGrid(game, game->currentBoard);
     }
     return possibleMoves;
+}
+
+int randomMove(CGameState * game) {
+    Coord *possibleMoves = getMoves(game);
+    int length = 0;
+    for (; possibleMoves[length].board != 10; length++) ;
+    length++;
+
+    //unsigned int tmp;
+    //long int backup = 0;
+    int randomNum = random() % length;
+    /*
+    int randomNum = 0;
+    
+    if (getrandom(&tmp, sizeof(unsigned int), GRND_NONBLOCK) == -1) {
+        perror("getrandom\n");
+        backup = random();
+        randomNum = backup % length;
+    } else {
+        randomNum = tmp % length;
+    }
+    */
+    playTurn(game, possibleMoves[randomNum].board, possibleMoves[randomNum].row, possibleMoves[randomNum].column);
+    free(possibleMoves);
+    return game->gameWon;
+}
+
+int simulateGame(CGameState * game) {
+    int won = randomMove(game);
+    int moves = 0;
+    while (won == NO_WIN && moves < 100) {
+        won = randomMove(game);
+        moves++;
+    }
+    return won;
 }

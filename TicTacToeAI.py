@@ -6,6 +6,29 @@ import copy
 import itertools
 import Heuristics as h
 
+
+class Coord(ctypes.Structure):
+    _fields_ = [("board",ctypes.c_ubyte),
+                ("row",ctypes.c_ubyte),
+                ("column",ctypes.c_ubyte)]
+    
+class MoveList(ctypes.Structure):
+    _fields_ = [("moveNum",ctypes.c_int),
+                ("moves",ctypes.POINTER(Coord))]
+    
+    def __init__(self,moves):
+        num = len(moves)
+        elems = (Coord * (num+1))()
+        self.moves = ctypes.cast(elems,ctypes.POINTER(Coord))
+        self.moveNum = num
+        
+        for i, move in enumerate(moves):
+            self.moves[i].board = move[0]
+            self.moves[i].row = move[1]
+            self.moves[i].column = move[2]
+        
+        
+
 class TicTacToeAI:
     @abstractmethod
     def chooseMove(self,game: g.GameState):
@@ -149,9 +172,9 @@ class ChooseWinLose(TicTacToeAI):
         else:
             return losingMoves[r.randrange(len(losingMoves))]
 
-class ChooseMinimax(TicTacToeAI):
+class ChooseMinimaxPy(TicTacToeAI):
     
-    VICTORY_VALUE = 10000
+    VICTORY_VALUE = 1000000
     
     def  __init__(self,layers:int,heuristic:h.Heuristic):
         self.layers = layers
@@ -178,15 +201,16 @@ class ChooseMinimax(TicTacToeAI):
         return possibleMoves[bestMove]
     
     def toString(self):
-        return "ChooseMinimax: " + str(self.layers) + " Layers, " + self.heuristic.toString()
+        return "ChooseMinimaxPy: " + str(self.layers) + " Layers, " + self.heuristic.toString()
     
     # minimax is based on the pseudocode from https://www.youtube.com/watch?v=l-hh51ncgDI
     def minimax(self,game:g.GameState,depth:int,alpha:int,beta:int,maximize:bool):
         if game.gameWon != g.NO_WIN:
-            if game.gameWon == 1:
-                return self.VICTORY_VALUE
-            elif game.gameWon == 2:
-                return -self.VICTORY_VALUE
+            if game.gameWon == g.GAME_WON:
+                if game.currentTurn == g.X_VAL:
+                    return self.VICTORY_VALUE
+                else:
+                    return -self.VICTORY_VALUE
             else:
                 return 0
         elif depth == 0:
@@ -217,12 +241,13 @@ class ChooseMinimax(TicTacToeAI):
                     break
             return minEval
         
-class ChooseMinimaxC(TicTacToeAI):
+class ChooseMinimax(TicTacToeAI):
     
-    VICTORY_VALUE = 10000
+    VICTORY_VALUE = 1000000
     
-    def  __init__(self,layers:int):
+    def  __init__(self,layers:int,heuristic:h.Heuristic):
         self.layers = layers
+        self.heuristic = heuristic
     
     def chooseMove(self,game:g.GameState):
         possibleMoves = game.getMoves()
@@ -234,7 +259,7 @@ class ChooseMinimaxC(TicTacToeAI):
         for move in possibleMoves:
             tempGame = copy.deepcopy(game)
             tempGame.playTurn(move[0],move[1],move[2])
-            eval = g.clibrary.minimaxWrapper(tempGame.toCGameState(),self.layers-1,-self.VICTORY_VALUE,self.VICTORY_VALUE,not maximize)
+            eval = g.clibrary.minimaxWrapper(tempGame.toCGameState(),self.layers-1,-self.VICTORY_VALUE,self.VICTORY_VALUE,not maximize,self.heuristic.values)
             if maximize and eval > bestEval:
                 bestMove = i
                 bestEval = eval
@@ -245,4 +270,4 @@ class ChooseMinimaxC(TicTacToeAI):
         return possibleMoves[bestMove]
     
     def toString(self):
-        return "ChooseMinimaxC: " + str(self.layers) + " Layer "
+        return "ChooseMinimax: " + str(self.layers) + " Layers " + self.heuristic.toString()

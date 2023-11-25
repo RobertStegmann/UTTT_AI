@@ -2,17 +2,38 @@ import GameState as g
 import ctypes
 from abc import ABC, abstractmethod
 
-BOARD_VALUE = 20
-GRID_VALUE = 1
+BOARD_VALUE = 28
+GRID_VALUE = 2
+PLAYABLE_VAL = 1
+MAX_RUNS = 100
+
+class HeuristicVal(ctypes.Structure):
+    _fields_ = [("boardVal",ctypes.c_int),
+                ("gridVal",ctypes.c_int),
+                ("playableVal",ctypes.c_int),
+                ("maxRuns",ctypes.c_int),
+                ("index",ctypes.c_int)]
 
 class Heuristic:
+    
+    def  __init__(self,*,boardVal = BOARD_VALUE, gridVal = GRID_VALUE,playableVal = PLAYABLE_VAL,maxRuns = MAX_RUNS):
+        index = -1
+        self.values = HeuristicVal(boardVal,gridVal,playableVal,maxRuns,index)
+    
     @abstractmethod
     def Heuristic(self,game: g.GameState):
-       return
+        return
    
     @abstractmethod
     def toString(self):
         return ""
+    
+    @abstractmethod
+    def valToString(self):
+        return ("Board Value: " + str(self.values.boardVal) + 
+                " Grid Value: " +  str(self.values.gridVal) +
+                " Playable Value: " +  str(self.values.playableVal) +
+                " Max Runs: " +  str(self.values.maxRuns))
     
     def evaluateBoard(self,game:g.GameState):
         evaluation = 0
@@ -152,6 +173,11 @@ class Heuristic:
         return evaluation
     
 class StaticHeuristic(Heuristic):
+    
+    def  __init__(self,*,boardVal = BOARD_VALUE, gridVal = GRID_VALUE,playableVal = PLAYABLE_VAL,maxRuns = MAX_RUNS):
+        index = 1
+        self.values = HeuristicVal(boardVal,gridVal,playableVal,maxRuns,index)
+    
     def heuristic(self,game:g.GameState):
         evaluation = self.evaluateBoard(game)
         
@@ -251,11 +277,59 @@ class StaticHeuristic(Heuristic):
         return evaluation
    
     def toString(self):
-        return "StaticHeuristic"
+        return "StaticHeuristic\n" + self.valToString()
+    
+    def valToString(self):
+        return ("Board Value: " + str(self.values.boardVal) + 
+                " Grid Value: " +  str(self.values.gridVal)) 
 
-class StaticHeuristicC(Heuristic):
+class StaticHeuristicC(Heuristic):    
+    
+    def  __init__(self,*,boardVal = BOARD_VALUE, gridVal = GRID_VALUE,playableVal = PLAYABLE_VAL,maxRuns = MAX_RUNS):
+        index = 0
+        self.values = HeuristicVal(boardVal,gridVal,playableVal,maxRuns,index)
+    
     def heuristic(self,game:g.GameState):
-        return g.clibrary.staticHeuristicWrapper(game.toCGameState())
+        return g.clibrary.staticHeuristicWrapper(game.toCGameState(),self.values)
    
     def toString(self):
-        return "StaticHeuristic using C"
+        return "StaticHeuristic using C\n" + self.valToString()
+    
+    def valToString(self):
+        return ("Board Value: " + str(self.values.boardVal) + 
+                " Grid Value: " +  str(self.values.gridVal)) 
+    
+class PlayableBoardHeuristic(Heuristic):
+    
+    def  __init__(self,*,boardVal = BOARD_VALUE, gridVal = GRID_VALUE,playableVal = PLAYABLE_VAL,maxRuns = MAX_RUNS):
+        index = 1
+        self.values = HeuristicVal(boardVal,gridVal,playableVal,maxRuns,index)
+    
+    def heuristic(self,game:g.GameState):
+        return g.clibrary.playableBoardHeuristicWrapper(game.toCGameState(),self.values)
+   
+    def toString(self):
+        return "PlayableBoardHeuristic\n" + self.valToString()
+    
+    def valToString(self):
+        return ("Board Value: " + str(self.values.boardVal) + 
+                " Grid Value: " +  str(self.values.gridVal) +
+                " Playable Value: " +  str(self.values.playableVal))
+        
+class MonteCarloHeuristic(Heuristic):
+    
+    def  __init__(self,*,boardVal = BOARD_VALUE, gridVal = GRID_VALUE,playableVal = PLAYABLE_VAL,maxRuns = MAX_RUNS):
+        index = 2
+        self.values = HeuristicVal(boardVal,gridVal,playableVal,maxRuns,index)
+    
+    def heuristic(self,game:g.GameState):
+        return g.clibrary.monteCarloHeuristicWrapper(game.toCGameState(),self.values)
+   
+    def toString(self):
+        return "MonteCarloHeuristic: " + self.valToString()
+    
+    def valToString(self):
+        return ("# of Runs: " + str(self.values.maxRuns))
+
+    
+    

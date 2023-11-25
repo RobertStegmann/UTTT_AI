@@ -105,7 +105,8 @@ mousePosition = []
 # Run until user quits
 run = True 
 
-AIPlayer = AI.ChooseMinimaxC(6)
+
+AIPlayer = AI.ChooseMinimax(4,h.MonteCarloHeuristic(maxRuns=100))
 
 while run:  
     # Event handlers
@@ -126,7 +127,7 @@ while run:
             boardRow = 3*y // SCREEN_HEIGHT
             boardColumn = 3*x // SCREEN_WIDTH
             board = g.GameState.coordToBoard(boardRow,boardColumn)
-            
+
             #Find clicked grid
             if game.gameWon == 0:# and game.currentTurn == 1:
                 gridRow = 9*(y % BOARD_HEIGHT) // SCREEN_HEIGHT
@@ -134,13 +135,13 @@ while run:
                 
                 move = game.playTurn(board,gridRow,gridColumn)
 
-                if move != -1:            
+                if move != -1:         
                     updateDraw()
                     
     if game.gameWon == 0 and game.currentTurn == 2:
         moveAI = AIPlayer.chooseMove(game)
         move = game.playTurn(moveAI[0],moveAI[1],moveAI[2])
-        if move != -1:                     
+        if move != -1:                    
             updateDraw()
     
             

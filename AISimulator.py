@@ -43,49 +43,63 @@ def simulateGames(AI_1:AI.TicTacToeAI, AI_2:AI.TicTacToeAI, gameNum=int):
     table = PrettyTable(["AI","Round 1 Wins","Round 2 Wins","Total Wins","Stalemates","Total Rounds","Win %","Run Time"])
     table.add_row([AI_1.toString(),wins[0][0],wins[1][1],wins[0][0]+wins[1][1],stalemates,2*rounds,winPerc_AI1,runTime[0][0]+runTime[1][1]])
     table.add_row([AI_2.toString(),wins[0][1],wins[1][0],wins[0][1]+wins[1][0],stalemates,2*rounds,winPerc_AI2,runTime[0][1]+runTime[1][0]])
-    print(table)
+    print(table, flush=True)
         
+
+
+
+
+
+            
+
+# for i in range(0,len(minimaxPlayable)):
+#     for j in range(i+1,len(minimaxPlayable)):
+#          simulateGames(minimaxPlayable[i],minimaxPlayable[j],1000)
+
+# for ms in minimaxStatic:
+#     for ps in minimaxPlayable:
+#         simulateGames(ms,ps,1000)
+
+# randAI = AI.RandomAI()
+# chooseWin = AI.ChooseWinLose(0)
+
+# statHeur = AI.ChooseMinimax(2,h.StaticHeuristic())
+# randHeur25 = AI.ChooseMinimax(2,h.MonteCarloHeuristic(maxRuns=25))
+# randHeur10 = AI.ChooseMinimax(2,h.MonteCarloHeuristic(maxRuns=10))
+
+# simulateGames(statHeur,randHeur25,500)
+
+
+# minimaxStatic = [
+#     AI.ChooseMinimax(4,h.StaticHeuristic(boardVal=10,gridVal=1)),
+#     AI.ChooseMinimax(4,h.StaticHeuristic(boardVal=11,gridVal=1)),
+#     AI.ChooseMinimax(4,h.StaticHeuristic(boardVal=12,gridVal=1)),
+#     AI.ChooseMinimax(4,h.StaticHeuristic(boardVal=13,gridVal=1)),
+#     AI.ChooseMinimax(4,h.StaticHeuristic(boardVal=14,gridVal=1)),
+#     AI.ChooseMinimax(4,h.StaticHeuristic(boardVal=15,gridVal=1)),
+#     AI.ChooseMinimax(4,h.StaticHeuristic(boardVal=20,gridVal=1)),
+#     AI.ChooseMinimax(4,h.StaticHeuristic(boardVal=25,gridVal=1)),
+#     AI.ChooseMinimax(4,h.StaticHeuristic(boardVal=30,gridVal=1)),
+# ]
+
+# for i in range(0,len(minimaxStatic)):
+#     for j in range(i+1,len(minimaxStatic)):
+#             simulateGames(minimaxStatic[i],minimaxStatic[j],1000)
         
 
-# allAIs = []
-# allAIs.append(AI.RandomAI())
-# for i in range(0,64):
-#     allAIs.append(AI.ChooseWinLose(i))
-# for i in range(0,len(allAIs)):
-#     for j in range(i+1,len(allAIs)):
-#        simulateGames(allAIs[i],allAIs[j],1000)
-randomAI = AI.RandomAI()
-chooseWinLose = AI.ChooseWinLose(0)
+minimaxPlayable = [
+    AI.ChooseMinimax(4,h.PlayableBoardHeuristic(boardVal=130,gridVal=10,playableVal=14)),
+    AI.ChooseMinimax(4,h.PlayableBoardHeuristic(boardVal=130,gridVal=10,playableVal=15)),
+    AI.ChooseMinimax(4,h.PlayableBoardHeuristic(boardVal=130,gridVal=10,playableVal=16)),
+    AI.ChooseMinimax(4,h.PlayableBoardHeuristic(boardVal=140,gridVal=10,playableVal=14)),
+    AI.ChooseMinimax(4,h.PlayableBoardHeuristic(boardVal=140,gridVal=10,playableVal=15)),
+    AI.ChooseMinimax(4,h.PlayableBoardHeuristic(boardVal=140,gridVal=10,playableVal=16)),
+]
 
-minimaxTwo = AI.ChooseMinimax(2,h.StaticHeuristic())
+for i in range(0,len(minimaxPlayable)):
+    for j in range(i+1,len(minimaxPlayable)):
+        simulateGames(minimaxPlayable[i],minimaxPlayable[j],1000)
+        
 
-minimaxCHeurisitic = []
-
-for i in range(2,6):
-    minimaxCHeurisitic.append(AI.ChooseMinimax(i,h.StaticHeuristicC()))
-
-minimaxFullC = []
-
-for i in range(2,7):
-    minimaxFullC.append(AI.ChooseMinimaxC(i))
-    
-# for i in range(0,5):
-#     for j in range(i+1,5):
-#         simulateGames(minimaxFullC[i],minimaxFullC[j],1000)
-
-# simulateGames(randomAI,minimaxFullC[4],1000)
-# simulateGames(chooseWinLose,minimaxFullC[4],1000)
-
-simulateGames(minimaxTwo,minimaxCHeurisitic[0],1000)
-simulateGames(minimaxTwo,minimaxFullC[0],1000)
-
-for i in range(0,4):
-    simulateGames(minimaxFullC[i],minimaxCHeurisitic[i],1000)
-
-
-
-#simulateGames(minimaxAITwo,chooseAI,100)
-#simulateGames(randomAI,minimaxCTwo,100)
-#simulateGames(randomAI,minimaxCFour,100)
-
+        
 
