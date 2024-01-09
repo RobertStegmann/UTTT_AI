@@ -2,9 +2,9 @@ import GameState as g
 import ctypes
 from abc import ABC, abstractmethod
 
-BOARD_VALUE = 28
-GRID_VALUE = 2
-PLAYABLE_VAL = 1
+BOARD_VALUE = 140
+GRID_VALUE = 10
+PLAYABLE_VAL = 16
 MAX_RUNS = 100
 
 class HeuristicVal(ctypes.Structure):

@@ -105,8 +105,8 @@ mousePosition = []
 # Run until user quits
 run = True 
 
-
-AIPlayer = AI.ChooseMinimax(4,h.MonteCarloHeuristic(maxRuns=100))
+#AIPlayer = AI.MonteCarloST(10000)
+AIPlayer = AI.ChooseMinimax(7,h.PlayableBoardHeuristic())
 
 while run:  
     # Event handlers

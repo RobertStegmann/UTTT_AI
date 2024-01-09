@@ -239,7 +239,7 @@ int minimax(CGameState * game, int depth, int alpha, int beta, bool maximize, in
     int eval;
     int a = alpha;
     int b = beta;
-    CGameState * tempGame;
+    CGameState tempGame;
     Coord * possibleMoves;
     if (game->gameWon != NO_WIN) {
         if (game->gameWon == GAME_WON) {
@@ -254,15 +254,14 @@ int minimax(CGameState * game, int depth, int alpha, int beta, bool maximize, in
     } else if (depth == 0) {
         return heuristic(game,val);
     }
-    tempGame = createCGameState();
     possibleMoves = getMoves(game);
     if (maximize) {
         bestEval = -VICTORY_VALUE;
         for (int i = 0; possibleMoves[i].board != 10; i++)
         {
-            copyCGameState(tempGame,game);
-            playTurn(tempGame, possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column);
-            eval = minimax(tempGame,depth-1,a,b,false,heuristic,val);
+            copyCGameState(&tempGame,game);
+            playTurn(&tempGame, possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column);
+            eval = minimax(&tempGame,depth-1,a,b,false,heuristic,val);
             bestEval = MAX(bestEval,eval);
             a = MAX(a,eval);
             if (b <= a) {
@@ -273,9 +272,9 @@ int minimax(CGameState * game, int depth, int alpha, int beta, bool maximize, in
         bestEval = VICTORY_VALUE;
         for (int i = 0; possibleMoves[i].board != 10; i++)
         {
-            copyCGameState(tempGame,game);
-            playTurn(tempGame, possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column);
-            eval = minimax(tempGame,depth-1,a,b,true,heuristic,val);
+            copyCGameState(&tempGame,game);
+            playTurn(&tempGame, possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column);
+            eval = minimax(&tempGame,depth-1,a,b,true,heuristic,val);
             bestEval = MIN(bestEval,eval);
             b = MIN(b,eval);
             if (b <= a) {
@@ -284,7 +283,6 @@ int minimax(CGameState * game, int depth, int alpha, int beta, bool maximize, in
         }
     }
     free(possibleMoves);
-    freeCGameState(tempGame);
     return bestEval;
 }
 
@@ -579,14 +577,13 @@ int playableBoardHeuristicWrapper(CGameState game,HeuristicVal val) {
 
 int monteCarloHeuristic(CGameState * game, HeuristicVal * val) {
     int evaluation = 0;
-    CGameState * tempGame = createCGameState();
+    CGameState tempGame;
     for (int i = 0; i < val->maxRuns; i++) {
-        copyCGameState(tempGame,game);
-        if (simulateGame(tempGame) == GAME_WON) {
-            evaluation += tempGame->currentTurn == X_VAL ? 1 : -1;
+        copyCGameState(&tempGame,game);
+        if (simulateGameFast2(&tempGame) == GAME_WON) {
+            evaluation += tempGame.currentTurn == X_VAL ? 1 : -1;
         }
     }
-    freeCGameState(tempGame);
     return evaluation;
 }
 
@@ -595,38 +592,176 @@ int monteCarloHeuristicWrapper(CGameState game,HeuristicVal val) {
     return monteCarloHeuristic(&game, &val);
 }
 
-typedef struct {
-    CGameState * game;
-    MonteCarloNode * parent;
-    Coord * moves;
-    MonteCarloNode ** children;
-    int childNum;
-    int visits;
-    int wins;
-} MonteCarloNode;
-
-int monteCarloTreeSearch(CGameState game, MoveList moves, int maxRuns) {
+Coord monteCarloTreeSearch(CGameState game, int maxRuns, double c) {
+    srandom(time(NULL));
     int bestMoveIndex = 0;
-
+    MonteCarloNode root;
+    MonteCarloNode * leaf;
+    double result;
+    intializeRoot(&root,&game);
     for (int i = 0; i < maxRuns; i++) {
-
-
+        leaf = traverse(&root,c);
+        result = rollout(leaf,root.game.currentTurn);
+        backpropogate(leaf,result);
     }
-
-    return bestMoveIndex;
-}
-
-MonteCarloNode * traverse(MonteCarloNode * node) {
-    MonteCarloNode * currentChild = NULL;
+    
+    double best_score = -INFINITY;
+    double score = 0;
     MonteCarloNode * bestChild = NULL;
-    if (node->childNum > 0) {
-        bestChild = node->children[0];
-        currentChild = node->children[0];
-        for (int i = 0; i < node->childNum; i++) {
 
+    for (int i = 0; i < root.childNum; i++) {
+        if (root.children[i]->N == 0) {
+            score = 0;
+        } else {
+            score = (root.children[i]->T / root.children[i]->N);
         }
+        
+        if (score > best_score) {
+            best_score = score;
+            bestChild = root.children[i];
+        }
+    }
+    
+    Coord bestMove = bestChild->move;
+
+    freeMonteCarloTree(&root);
+    
+    return bestMove;
+}
+
+void intializeRoot(MonteCarloNode * root, CGameState * game) {
+    root->N = 0;
+    root->T = 0;
+    root->childNum = 0;
+
+    root->parent = NULL;
+
+    copyCGameState(&root->game,game);
+    root->move.board = 10;
+
+    if (root->game.gameWon == NO_WIN) {
+        getMovesList(&root->game,&root->possibleMoves);
     } else {
-        return node;
+        root->possibleMoves.length = 0;
+    }
+    root->children = NULL;
+
+    expand(root);
+}
+
+MonteCarloNode * createNode(CGameState * game, MonteCarloNode * parent, Coord * move) {
+    MonteCarloNode * node = malloc(sizeof(MonteCarloNode));
+    node->N = 0;
+    node->T = 0;
+    node->childNum = 0;
+
+    node->parent = parent;
+
+    copyCGameState(&node->game,game);
+
+    if (move != NULL) {
+        playTurn(&node->game,move->board,move->row,move->column);
+        node->move = *move;
+    } else {
+        node->move.board = 10;
+    }
+    
+    int i = 0;
+    if (node->game.gameWon == NO_WIN) {
+        getMovesList(&node->game,&node->possibleMoves);
+    } else {
+        node->possibleMoves.length = 0;
+    }
+
+    node->children = NULL;
+}
+
+void expand(MonteCarloNode * node) {
+    if (node->possibleMoves.length == 0) {
+        return;
+    }
+    shuffleMoveList(&node->possibleMoves);
+    node->children = malloc(sizeof(MonteCarloNode *)*node->possibleMoves.length);
+    for (int i = 0; i < node->possibleMoves.length ; i++) {
+        node->children[i] = createNode(&node->game,node,&(node->possibleMoves.moves[i]));
+    }
+    node->childNum = node->possibleMoves.length;
+}
+
+MonteCarloNode * traverse(MonteCarloNode * node, double c) {
+    MonteCarloNode * bestChild = NULL;
+    if (node->childNum == 0) {
+        if (node->N == 0 ||  node->possibleMoves.length  == 0) {
+            return node;
+        }
+        expand(node);
+        return node->children[0];
+    }
+
+    bestChild = node->children[0];
+    double best_ucb = calcUCB(node->children[0],c);
+    double ucb = 0;
+
+    for (int i = 1; i < node->childNum && best_ucb != INFINITY; i++) {
+        ucb = calcUCB(node->children[i],c);
+        if (ucb > best_ucb) {
+            best_ucb = ucb;
+            bestChild = node->children[i];
+        }
+    }
+    return traverse(bestChild,c);
+}
+
+double calcUCB(MonteCarloNode * node, double c) {
+    if (node->N == 0) {
+        return INFINITY;
+    }
+
+    MonteCarloNode * parent = node->parent;
+    if (parent == NULL) {
+        parent = node;
+    }
+    return (node->T/node->N) + c * sqrt(log(parent->N) / node->N);
+}
+
+double rollout(MonteCarloNode * node,unsigned char player) {
+    CGameState game;
+    copyCGameState(&game,&node->game);
+    simulateGameFast(&game);
+
+    if (game.gameWon == STALEMATE) {
+        return (1/2);
+    }
+
+    if (game.currentTurn == player) {
+        return 1;
+    }
+
+    return 0;
+}
+
+void backpropogate(MonteCarloNode * node, double result) {
+    node->N += 1;
+    node->T += result;
+
+    if (node->parent != NULL) {
+        backpropogate(node->parent,result);
     }
 }
 
+void freeMonteCarloTree(MonteCarloNode * root) {
+    for (int i = 0; i < root->childNum; i++) {
+        freeMonteCarloNode(root->children[i]);
+    }
+
+    free(root->children);
+}
+
+void freeMonteCarloNode(MonteCarloNode * node) {
+    for (int i = 0; i < node->childNum; i++) {
+        freeMonteCarloNode(node->children[i]);
+    }
+
+    free(node->children);
+    free(node);
+}

@@ -9,6 +9,7 @@
 #include <string.h> 
 #include <stdbool.h>
 #include <sys/random.h>
+#include <math.h>
 
 #define BOARDSIZE 81
 #define GRIDSIZE 9
@@ -25,6 +26,8 @@
 #define ROW_DIMENSION 3
 #define COL_DIMENSION ROW_DIMENSION
 #define VICTORY_VALUE 1000000
+
+#define MAX_MOVES (BOARDSIZE+1)
 
 #define BOARD_VALUE 28
 #define GRID_VALUE 2
@@ -49,8 +52,8 @@ typedef struct {
 } Coord;
 
 typedef struct {
-    int moveNum;
-    Coord * moves;
+    int length;
+    Coord moves[MAX_MOVES];
 } MoveList;
 
 typedef struct {
@@ -65,6 +68,17 @@ typedef struct {
     int maxRuns;
     int index;
 } HeuristicVal;
+
+typedef struct MonteCarloNode {
+    CGameState game;
+    struct MonteCarloNode * parent;
+    MoveList possibleMoves;
+    struct MonteCarloNode ** children;
+    Coord move;
+    int childNum;
+    double N;
+    double T;
+} MonteCarloNode;
 
 void * countTopLeft(void * foo);
 void * countTopCentre(void * foo);
@@ -89,8 +103,17 @@ double countMoves(CGameState *game);
 double countMovesLayers(CGameState *game, int layers);
 Coord *chooseMoveFullBoard(CGameState *game);
 Coord *chooseMoveSingleGrid(CGameState *game, unsigned char board);
-
 Coord * getMoves(CGameState *game);
+
+void chooseMoveListSingleGrid(CGameState *game, MoveList * moves, unsigned char board);
+void chooseMoveListFullBoard(CGameState *game, MoveList * moves);
+void getMovesList(CGameState *game, MoveList * moves);
+
+void shuffleMoveList(MoveList * list);
+void shuffleMoves(Coord * moves, int moveCount) ;
+
+Coord * trimMoves(Coord * moves, int * length);
+
 CGameState * copyCGameState(CGameState * copy, CGameState * original);
 
 int evaluateBoard(CGameState * game,HeuristicVal * val);
@@ -111,6 +134,23 @@ int playableBoardHeuristicWrapper(CGameState game, HeuristicVal val);
 int randomMove(CGameState * game);
 int simulateGame(CGameState * game);
 
+int simulateGameFast(CGameState * game);
+int simulateGameFast2(CGameState * game);
+
 int monteCarloHeuristic(CGameState * game, HeuristicVal * val);
 int monteCarloHeuristicWrapper(CGameState game,HeuristicVal val);
+
+
+Coord monteCarloTreeSearch(CGameState game, int maxRuns, double c);
+double calcUCB(MonteCarloNode * node, double c);
+void intializeRoot(MonteCarloNode * root, CGameState * game);
+MonteCarloNode * createNode(CGameState * game, MonteCarloNode * parent, Coord * move);
+void expand(MonteCarloNode * node);
+MonteCarloNode * traverse(MonteCarloNode * node, double c);
+double calcUCB(MonteCarloNode * node, double c);
+double rollout(MonteCarloNode * node,unsigned char player);
+void backpropogate(MonteCarloNode * node, double result);
+void freeMonteCarloTree(MonteCarloNode * root);
+void freeMonteCarloNode(MonteCarloNode * node);
+
 #endif

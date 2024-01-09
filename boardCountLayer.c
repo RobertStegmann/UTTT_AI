@@ -146,18 +146,16 @@ double countMovesLayers(CGameState *game, int layers)
     double moveCount = 0;
     Coord *possibleMoves;
     possibleMoves = getMoves(game);
-    CGameState *tempGame = createCGameState();
+    CGameState tempGame;
     for (int i = 0; possibleMoves[i].board != 10; i++)
     {
-        copyCGameState(tempGame,game);
-        playTurn(tempGame, possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column);
+        copyCGameState(&tempGame,game);
+        playTurn(&tempGame, possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column);
         moveCount++;
-        if (tempGame->gameWon == 0 &&  0 < layers)
+        if (tempGame.gameWon == 0 &&  0 < layers)
         {
-            moveCount += countMovesLayers(tempGame, layers - 1);
+            moveCount += countMovesLayers(&tempGame, layers - 1);
         }
-        
     }
-    freeCGameState(tempGame);
     free(possibleMoves);
 }

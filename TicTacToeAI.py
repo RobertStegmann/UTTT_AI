@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 import copy
 import itertools
 import Heuristics as h
+import math
 
 
 class Coord(ctypes.Structure):
@@ -271,3 +272,131 @@ class ChooseMinimax(TicTacToeAI):
     
     def toString(self):
         return "ChooseMinimax: " + str(self.layers) + " Layers " + self.heuristic.toString()
+    
+class MonteCarloST(TicTacToeAI):
+    
+    def __init__(self,max_iter,*, c = math.sqrt(2)):
+        g.clibrary.monteCarloTreeSearch.restype = Coord
+        self.max_iter = max_iter
+        self.c = c
+    
+    def chooseMove(self,game:g.GameState):
+        coord = g.clibrary.monteCarloTreeSearch(game.toCGameState(),self.max_iter,ctypes.c_double(self.c))
+        move = (coord.board,coord.row,coord.column)
+        return move
+    
+    def toString(self):
+        return "MonteCarloST: " + str(self.max_iter) + " Iterations, c=" + str(self.c)
+    
+    
+class MonteCarloSTPy(TicTacToeAI):
+    
+    def __init__(self,max_iter,*, c = math.sqrt(2)):
+        self.max_iter = max_iter
+        self.c = c
+    
+    def chooseMove(self,game:g.GameState):
+        root = Node(game,None,None)
+        root.expand()
+        for i in range(0,self.max_iter):
+            leaf = root.traverse(self.c)
+            result = leaf.rollout(root.game.currentTurn)
+            leaf.backpropogate(result)
+        
+        best_score = -float('inf')
+        best = 0
+        for (i,child) in enumerate(root.children):
+            if child.N > 0:
+                score = child.T / child.N
+            else:
+                score = 0
+            if score > best_score:
+                best = i
+                best_score = score
+        
+        return root.children[best].move
+    
+    def toString(self):
+        return "MonteCarloSTPy: " + str(self.max_iter) + " Iterations, c=" + str(self.c)
+                
+            
+    
+class Node:
+    
+    def __init__(self,game,parent,move):
+        
+        self.T = 0
+        self.N = 0
+        
+        self.parent = parent
+        
+        self.game = copy.deepcopy(game)
+        if move is not None:
+            self.game.playTurn(move[0],move[1],move[2])
+        
+        self.move = move
+        
+        if self.game.gameWon == g.NO_WIN:
+            self.possibleMoves = self.game.getMoves()
+            r.shuffle(self.possibleMoves)
+        else:
+            self.possibleMoves = []
+
+        self.children = []
+        
+    def traverse(self,c):        
+        if len(self.children) == 0:
+            if self.N == 0 or len(self.possibleMoves) == 0 :
+                return self
+            self.expand()
+            return self.children[0]
+        
+        best_ucb = -float('inf')
+        best = -1
+        ucb = -float('inf')
+        for (i,child) in enumerate(self.children):
+            ucb = child.calcUCB(c)
+            if ucb > best_ucb :
+                best = i
+                best_ucb = ucb
+                
+        return self.children[best].traverse(c)            
+        
+    def calcUCB(self,c):
+        if self.N == 0:
+            return float('inf')
+        parent = self.parent
+        if parent is None:
+            parent = self
+        return (self.T / self.N) + c * math.sqrt(math.log(self.parent.N) / self.N)
+        
+    def rollout(self,player):
+        random = RandomAI()
+        game = copy.deepcopy(self.game)
+        while game.gameWon == g.NO_WIN:
+            move = random.chooseMove(game)
+            game.playTurn(move[0],move[1],move[2])
+        
+        if game.gameWon == g.STALEMATE:
+            return (1/2)
+        
+        if game.currentTurn == player:
+            return 1
+        
+        return 0
+        
+    def expand(self):
+        for move in self.possibleMoves:
+            self.children.append(Node(self.game,self,move))
+    
+    def backpropogate(self,result):
+        self.N += 1
+        self.T += result
+        
+        if self.parent is None:
+            return
+        
+        self.parent.backpropogate(result)
+        
+        
+            

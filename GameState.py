@@ -156,6 +156,12 @@ class CGameState(ctypes.Structure):
                 ("currentBoard",ctypes.c_ubyte),
                 ("currentTurn",ctypes.c_ubyte),
                 ("gameWon",ctypes.c_char)]
+    
+class Coord(ctypes.Structure):
+    _fields_ = [("board",ctypes.c_ubyte),
+                ("row",ctypes.c_ubyte),
+                ("column",ctypes.c_ubyte)]
+
  
         
             
