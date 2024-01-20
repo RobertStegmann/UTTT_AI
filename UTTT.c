@@ -28,6 +28,8 @@ CGameState * copyCGameState(CGameState * copy, CGameState * original)
         exit(1);
     }
 
+    *copy = *original;
+    /*
     for (int i = 0; i < GRIDSIZE; i++)
     {
         for (int j = 0; j < ROW_DIMENSION; j++)
@@ -50,7 +52,7 @@ CGameState * copyCGameState(CGameState * copy, CGameState * original)
     copy->currentBoard = original->currentBoard;
     copy->currentTurn = original->currentTurn;
     copy->gameWon = original->gameWon;
-
+    */
     return copy;
 }
 
@@ -173,8 +175,8 @@ int playTurn(CGameState *game, int board, int row, int column)
     int boardColumn;
     if (boardWin != NO_WIN)
     {
-        int boardRow = (int)(board / ROW_DIMENSION);
-        int boardColumn = board % COL_DIMENSION;
+        boardRow = (int)(board / ROW_DIMENSION);
+        boardColumn = board % COL_DIMENSION;
         game->boardsWon[boardRow][boardColumn] = boardWin == GAME_WON ? (unsigned char)game->currentTurn : STALEMATE;
         game->gameWon = (char)isGameWon(game, board);
         if (game->gameWon != NO_WIN)
@@ -186,6 +188,17 @@ int playTurn(CGameState *game, int board, int row, int column)
     game->currentTurn = game->currentTurn == X_VAL ? O_VAL : X_VAL;
     game->currentBoard = game->boardsWon[row][column] == NO_WIN ? (unsigned char)(COL_DIMENSION * row + column) : ANYBOARD;
     return NO_WIN;
+}
+
+void revertTurn(CGameState *game, int board, int row, int column, unsigned char previousBoard)
+{
+    // Move must be valid, so we don't need to check here
+    game->board[board][row][column] = NO_WIN;
+    int boardRow = (int)(board / ROW_DIMENSION);
+    int boardColumn = board % COL_DIMENSION;
+    game->boardsWon[boardRow][boardColumn] = NO_WIN;
+    game->currentTurn = game->currentTurn == X_VAL ? O_VAL : X_VAL;
+    game->currentBoard = previousBoard;
 }
 
 Coord *chooseMoveFullBoard(CGameState *game)
@@ -356,15 +369,16 @@ int isWinningMove(CGameState * game, int board, int row, int column) {
         int boardWin = isBoardWon(game, board, row, column);
         int boardRow;
         int boardColumn;
-        if (boardWin != NO_WIN)
+        if (boardWin != GAME_WON)
         {
-            int boardRow = (int)(board / ROW_DIMENSION);
-            int boardColumn = board % COL_DIMENSION;
-            game->boardsWon[boardRow][boardColumn] = boardWin == GAME_WON ? (unsigned char)game->currentTurn : STALEMATE;
-            game->gameWon = (char)isGameWon(game, board);
+            boardRow = (int)(board / ROW_DIMENSION);
+            boardColumn = board % COL_DIMENSION;
+            char gameWin;
+            game->boardsWon[boardRow][boardColumn] = (unsigned char)game->currentTurn;
+            gameWin = (char)isGameWon(game, board);
             game->board[board][row][column] = NO_WIN;
             game->boardsWon[boardRow][boardColumn] = NO_WIN;
-            if (game->gameWon != NO_WIN)
+            if (gameWin == GAME_WON)
             {
                 return 1;
             } 
@@ -380,82 +394,63 @@ int isWinningMove(CGameState * game, int board, int row, int column) {
     return -1;
 }
 
-
-
-int simulateGame(CGameState * game) {
-    int won = randomMove(game);
-    int moves = 0;
-    while (won == NO_WIN && moves < 100) {
-        won = randomMove(game);
-        moves++;
-    }
-    return won;
+int chooseRandomMove(CGameState * game, MoveList * moves) {
+    return random() % moves->length;
 }
 
-int simulateGameFast(CGameState * game) {
-    Coord possibleMoves[MAX_MOVES];
-    int moveCount = 0;
-    int currentBoard = 0;
-    int randomNum = 0;
-    while (game->gameWon == NO_WIN) {
-        moveCount = 0;
-        if (game->currentBoard == ANYBOARD)
-        {
-            for (int i = 0; i < ROW_DIMENSION; i++)
-            {
-                for (int j = 0; j < COL_DIMENSION; j++)
-                {
-                    if (game->boardsWon[i][j] == NO_WIN)
-                    {
-                        currentBoard = COL_DIMENSION * i + j;
-                        for (int k = 0; k < ROW_DIMENSION; k++)
-                        {
-                            for (int l = 0; l < COL_DIMENSION; l++)
-                            {
-                                if (game->board[currentBoard][k][l] == 0)
-                                {
-                                    possibleMoves[moveCount].board = currentBoard;
-                                    possibleMoves[moveCount].row = k;
-                                    possibleMoves[moveCount].column = l;
-                                    moveCount++;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+int chooseWinningMove(CGameState * game, MoveList * moves) {
+    for (int i = 0; i < moves->length; i++) {
+        if (isWinningMove(game,moves->moves[i].board,moves->moves[i].row,moves->moves[i].column) == 1) {
+            return i;
         }
-        else
-        {
-            for (int i = 0; i < ROW_DIMENSION; i++)
-            {
-                for (int j = 0; j < COL_DIMENSION; j++)
-                {
-                    if (game->board[game->currentBoard][i][j] == OPEN_VAL)
-                    {
-                        possibleMoves[moveCount].board = game->currentBoard;
-                        possibleMoves[moveCount].row = i;
-                        possibleMoves[moveCount].column = j;
-                        moveCount++;
-                    }
-                }
-            }
-        }
-        randomNum = random() % moveCount;
-        playTurn(game, possibleMoves[randomNum].board, possibleMoves[randomNum].row, possibleMoves[randomNum].column);
     }
-    return game->gameWon;
+    return random() % moves->length;
 }
 
-int simulateGameFast2(CGameState * game) {
+int chooseWinLose(CGameState * game, MoveList * moves) {
+    for (int i = 0; i < moves->length; i++) {
+        if (isWinningMove(game,moves->moves[i].board,moves->moves[i].row,moves->moves[i].column) == 1) {
+            return i;
+        }
+    }
+    int randMove = random() % moves->length;
+    MoveList nextMoves;
+    bool losingMove = false;
+    unsigned char playableBoard = game->currentBoard;
+    for (int i = 0; i < moves->length; i++) {
+        playTurn(game, moves->moves[randMove].board, moves->moves[randMove].row, moves->moves[randMove].column);
+        getMovesList(game,&nextMoves);
+        losingMove = false;
+        for (int j = 0; j < nextMoves.length; j++) {
+            if (isWinningMove(game,nextMoves.moves[j].board,nextMoves.moves[j].row,nextMoves.moves[j].column) == 1) {
+                losingMove = true;
+                break;
+            }
+        }
+        revertTurn(game,moves->moves[randMove].board, moves->moves[randMove].row, moves->moves[randMove].column,playableBoard);
+        if (losingMove) {
+            randMove = (randMove + 1) % moves->length;
+        } else {
+            break;
+        }
+    }
+    return randMove;
+}
+
+int simulateGame(CGameState * game, int policy) {
     MoveList moves;
+    int (*moveChoice[])(CGameState *,MoveList *) = {
+        chooseRandomMove,
+        chooseWinningMove,
+        chooseWinLose
+    };
     int moveCount = 0;
     int currentBoard = 0;
-    int randomNum = 0;
+    int moveNum = 0;
     while (game->gameWon == NO_WIN) {
-        getMovesList(game,&moves);        
-        randomNum = random() % moves.length;
-        playTurn(game, moves.moves[randomNum].board, moves.moves[randomNum].row, moves.moves[randomNum].column);
+        getMovesList(game,&moves);
+        moveNum = moveChoice[policy](game,&moves);        
+        playTurn(game, moves.moves[moveNum].board, moves.moves[moveNum].row, moves.moves[moveNum].column);
     }
     return game->gameWon;
 }
@@ -467,3 +462,69 @@ Coord * trimMoves(Coord * moves, int * length) {
     return realloc(moves,sizeof(Coord)*(i));;
 }
 
+int chooseRandomMove_thread(CGameState * game, MoveList * moves, struct random_data * buf) {
+    int r;
+    random_r(buf,&r);
+    return r % moves->length;
+}
+
+int chooseWinningMove_thread(CGameState * game, MoveList * moves, struct random_data * buf) {
+    for (int i = 0; i < moves->length; i++) {
+        if (isWinningMove(game,moves->moves[i].board,moves->moves[i].row,moves->moves[i].column) == 1) {
+            return i;
+        }
+    }
+    int r;
+    random_r(buf,&r);
+    return r % moves->length;
+}
+
+int chooseWinLose_thread(CGameState * game, MoveList * moves, struct random_data * buf) {
+    for (int i = 0; i < moves->length; i++) {
+        if (isWinningMove(game,moves->moves[i].board,moves->moves[i].row,moves->moves[i].column) == 1) {
+            return i;
+        }
+    }
+    int randMove;
+    random_r(buf,&randMove);
+    randMove = randMove % moves->length;
+    MoveList nextMoves;
+    bool losingMove = false;
+    unsigned char playableBoard = game->currentBoard;
+    for (int i = 0; i < moves->length; i++) {
+        playTurn(game, moves->moves[randMove].board, moves->moves[randMove].row, moves->moves[randMove].column);
+        getMovesList(game,&nextMoves);
+        losingMove = false;
+        for (int j = 0; j < nextMoves.length; j++) {
+            if (isWinningMove(game,nextMoves.moves[j].board,nextMoves.moves[j].row,nextMoves.moves[j].column) == 1) {
+                losingMove = true;
+                break;
+            }
+        }
+        revertTurn(game,moves->moves[randMove].board, moves->moves[randMove].row, moves->moves[randMove].column,playableBoard);
+        if (losingMove) {
+            randMove = (randMove + 1) % moves->length;
+        } else {
+            break;
+        }
+    }
+    return randMove;
+}
+
+int simulateGame_thread(CGameState * game, int policy,struct random_data * buf) {
+    MoveList moves;
+    int (*moveChoice[])(CGameState *,MoveList *,struct random_data * buf) = {
+        chooseRandomMove_thread,
+        chooseWinningMove_thread,
+        chooseWinLose_thread
+    };
+    int moveCount = 0;
+    int currentBoard = 0;
+    int moveNum = 0;
+    while (game->gameWon == NO_WIN) {
+        getMovesList(game,&moves);
+        moveNum = moveChoice[policy](game,&moves,buf);        
+        playTurn(game, moves.moves[moveNum].board, moves.moves[moveNum].row, moves.moves[moveNum].column);
+    }
+    return game->gameWon;
+}

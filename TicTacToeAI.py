@@ -7,7 +7,6 @@ import itertools
 import Heuristics as h
 import math
 
-
 class Coord(ctypes.Structure):
     _fields_ = [("board",ctypes.c_ubyte),
                 ("row",ctypes.c_ubyte),
@@ -27,8 +26,13 @@ class MoveList(ctypes.Structure):
             self.moves[i].board = move[0]
             self.moves[i].row = move[1]
             self.moves[i].column = move[2]
-        
-        
+
+class MCST_Args(ctypes.Structure):
+    _fields_ = [("rollout",ctypes.c_int),
+                ("maxRuns",ctypes.c_int),
+                ("c",ctypes.c_double),
+                ("threads",ctypes.c_int)]
+              
 
 class TicTacToeAI:
     @abstractmethod
@@ -88,7 +92,7 @@ class RandomAI(TicTacToeAI):
     
 class ChooseWinLose(TicTacToeAI):
     
-    def  __init__(self,priority:int):
+    def  __init__(self,priority:int,*,verbose = False):
         self.setPriority(priority)
     
     def toString(self):
@@ -177,7 +181,8 @@ class ChooseMinimaxPy(TicTacToeAI):
     
     VICTORY_VALUE = 1000000
     
-    def  __init__(self,layers:int,heuristic:h.Heuristic):
+    def  __init__(self,layers:int,heuristic:h.Heuristic,*,verbose = False):
+        self.verbose = verbose
         self.layers = layers
         self.heuristic = heuristic
     
@@ -202,7 +207,7 @@ class ChooseMinimaxPy(TicTacToeAI):
         return possibleMoves[bestMove]
     
     def toString(self):
-        return "ChooseMinimaxPy: " + str(self.layers) + " Layers, " + self.heuristic.toString()
+        return "ChooseMinimaxPy: " + str(self.layers) + " Layers, " + self.heuristic.toString(self.verbose)
     
     # minimax is based on the pseudocode from https://www.youtube.com/watch?v=l-hh51ncgDI
     def minimax(self,game:g.GameState,depth:int,alpha:int,beta:int,maximize:bool):
@@ -246,7 +251,8 @@ class ChooseMinimax(TicTacToeAI):
     
     VICTORY_VALUE = 1000000
     
-    def  __init__(self,layers:int,heuristic:h.Heuristic):
+    def  __init__(self,layers:int,heuristic:h.Heuristic,*,verbose = False):
+        self.verbose = verbose
         self.layers = layers
         self.heuristic = heuristic
     
@@ -271,27 +277,31 @@ class ChooseMinimax(TicTacToeAI):
         return possibleMoves[bestMove]
     
     def toString(self):
-        return "ChooseMinimax: " + str(self.layers) + " Layers " + self.heuristic.toString()
+        return "ChooseMinimax: " + str(self.layers) + " Layers, " + self.heuristic.toString(self.verbose)
     
 class MonteCarloST(TicTacToeAI):
     
-    def __init__(self,max_iter,*, c = math.sqrt(2)):
+    def __init__(self,max_iter,*, c = math.sqrt(2), policy = h.DEFAULT_POLICY, threads = 1,verbose = False):
+        self.verbose = verbose
         g.clibrary.monteCarloTreeSearch.restype = Coord
-        self.max_iter = max_iter
-        self.c = c
+        self.args = MCST_Args(policy,max_iter,c,threads)
     
     def chooseMove(self,game:g.GameState):
-        coord = g.clibrary.monteCarloTreeSearch(game.toCGameState(),self.max_iter,ctypes.c_double(self.c))
+        coord = g.clibrary.monteCarloTreeSearch(game.toCGameState(),self.args)
         move = (coord.board,coord.row,coord.column)
         return move
     
     def toString(self):
-        return "MonteCarloST: " + str(self.max_iter) + " Iterations, c=" + str(self.c)
+        string = "MonteCarloST: " + str(self.args.maxRuns) + " Iterations"
+        if self.verbose:
+            string = string + ", c=" + str(self.args.c) +  " Policy: " + str(self.args.rollout) + " # of threads: " + str(self.args.threads)
+        return string
     
     
 class MonteCarloSTPy(TicTacToeAI):
     
-    def __init__(self,max_iter,*, c = math.sqrt(2)):
+    def __init__(self,max_iter,*, c = math.sqrt(2),verbose = False):
+        self.verbose = verbose
         self.max_iter = max_iter
         self.c = c
     

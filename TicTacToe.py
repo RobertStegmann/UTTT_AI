@@ -105,8 +105,8 @@ mousePosition = []
 # Run until user quits
 run = True 
 
-#AIPlayer = AI.MonteCarloST(10000)
-AIPlayer = AI.ChooseMinimax(7,h.PlayableBoardHeuristic())
+AIPlayer = AI.MonteCarloST(1000,threads=2)
+#AIPlayer = AI.ChooseMinimax(7,h.PlayableBoardHeuristic())
 
 while run:  
     # Event handlers
@@ -139,6 +139,7 @@ while run:
                     updateDraw()
                     
     if game.gameWon == 0 and game.currentTurn == 2:
+        
         moveAI = AIPlayer.chooseMove(game)
         move = game.playTurn(moveAI[0],moveAI[1],moveAI[2])
         if move != -1:                    

@@ -239,8 +239,8 @@ int minimax(CGameState * game, int depth, int alpha, int beta, bool maximize, in
     int eval;
     int a = alpha;
     int b = beta;
-    CGameState tempGame;
     Coord * possibleMoves;
+    unsigned char playableBoard;
     if (game->gameWon != NO_WIN) {
         if (game->gameWon == GAME_WON) {
             if (game->currentTurn == X_VAL) {
@@ -255,13 +255,14 @@ int minimax(CGameState * game, int depth, int alpha, int beta, bool maximize, in
         return heuristic(game,val);
     }
     possibleMoves = getMoves(game);
+    playableBoard = game->currentBoard;
     if (maximize) {
         bestEval = -VICTORY_VALUE;
         for (int i = 0; possibleMoves[i].board != 10; i++)
         {
-            copyCGameState(&tempGame,game);
-            playTurn(&tempGame, possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column);
-            eval = minimax(&tempGame,depth-1,a,b,false,heuristic,val);
+            playTurn(game, possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column);
+            eval = minimax(game,depth-1,a,b,false,heuristic,val);
+            revertTurn(game,possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column,playableBoard);
             bestEval = MAX(bestEval,eval);
             a = MAX(a,eval);
             if (b <= a) {
@@ -270,11 +271,12 @@ int minimax(CGameState * game, int depth, int alpha, int beta, bool maximize, in
         }
     } else {
         bestEval = VICTORY_VALUE;
+    
         for (int i = 0; possibleMoves[i].board != 10; i++)
         {
-            copyCGameState(&tempGame,game);
-            playTurn(&tempGame, possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column);
-            eval = minimax(&tempGame,depth-1,a,b,true,heuristic,val);
+            playTurn(game, possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column);
+            eval = minimax(game,depth-1,a,b,true,heuristic,val);
+            revertTurn(game,possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column,playableBoard);
             bestEval = MIN(bestEval,eval);
             b = MIN(b,eval);
             if (b <= a) {
@@ -578,13 +580,64 @@ int playableBoardHeuristicWrapper(CGameState game,HeuristicVal val) {
 int monteCarloHeuristic(CGameState * game, HeuristicVal * val) {
     int evaluation = 0;
     CGameState tempGame;
-    for (int i = 0; i < val->maxRuns; i++) {
-        copyCGameState(&tempGame,game);
-        if (simulateGameFast2(&tempGame) == GAME_WON) {
-            evaluation += tempGame.currentTurn == X_VAL ? 1 : -1;
+    if (val->threads <=1) {
+        for (int i = 0; i < val->maxRuns; i++) {
+            tempGame = *game;
+            if (simulateGame(&tempGame,val->montePolicy) == GAME_WON) {
+                evaluation += tempGame.currentTurn == X_VAL ? 1 : -1;
+            }
         }
+    } else {
+        int threadNum = val->threads <= MAX_THREADS ? val->threads : MAX_THREADS;
+        pthread_t t_id[MAX_THREADS];
+        MCHuerArg r_arg[MAX_THREADS];
+        int errorCode;
+        if (t_id == NULL) {
+            fprintf(stderr, "ERROR: pthread_t malloc failed\n");
+            exit(1);
+        }
+        if (r_arg == NULL) {
+            fprintf(stderr, "ERROR: RolloutArg malloc failed\n");
+            exit(1);
+        }
+        int remainder = val->maxRuns % val->threads;
+        int runNum = (val->maxRuns-remainder) / val->threads;
+        for (int i = 0; i < threadNum; i++) {
+            r_arg[i].game = *game;
+            r_arg[i].montePolicy = val->montePolicy;
+            r_arg[i].maxRuns = i == 0 ? runNum+remainder : runNum;
+            r_arg[i].eval = 0;
+            r_arg[i].seed = random();
+            errorCode = pthread_create((&t_id[i]), NULL, &monteCarloHeuristic_thread, (void *)(&r_arg[i]));
+            if (errorCode)
+            {
+                fprintf(stderr, "ERROR: errorCode = pthread_create() failed\n");
+                exit(1);
+            }
+        }
+        evaluation = 0;
+        for (int i = 0; i < threadNum; i++)
+        {
+            pthread_join(t_id[i], NULL);
+            evaluation += r_arg[i].eval;
+        }
+        return evaluation;
     }
     return evaluation;
+}
+
+void * monteCarloHeuristic_thread(void * args) {
+    MCHuerArg * MCarg = ((MCHuerArg *) args);
+    CGameState tempGame;
+    struct random_data buf;
+    char statebuf[STATESIZE];
+    initstate_r(MCarg->seed, statebuf, STATESIZE, &buf);
+    for (int i = 0; i < MCarg->maxRuns; i++) {
+        tempGame = MCarg->game;
+        if (simulateGame_thread(&tempGame,MCarg->montePolicy,&buf) == GAME_WON) {
+            ((MCHuerArg *) args)->eval += tempGame.currentTurn == X_VAL ? 1 : -1;
+        }
+    }
 }
 
 int monteCarloHeuristicWrapper(CGameState game,HeuristicVal val) {
@@ -592,16 +645,16 @@ int monteCarloHeuristicWrapper(CGameState game,HeuristicVal val) {
     return monteCarloHeuristic(&game, &val);
 }
 
-Coord monteCarloTreeSearch(CGameState game, int maxRuns, double c) {
+Coord monteCarloTreeSearch(CGameState game, MCST_Args args) {
     srandom(time(NULL));
     int bestMoveIndex = 0;
     MonteCarloNode root;
     MonteCarloNode * leaf;
-    double result;
+    double result = 0;
     intializeRoot(&root,&game);
-    for (int i = 0; i < maxRuns; i++) {
-        leaf = traverse(&root,c);
-        result = rollout(leaf,root.game.currentTurn);
+    for (int i = 0; i < args.maxRuns; i++) {
+        leaf = traverse(&root,args.c);
+        result = rollout(leaf,root.game.currentTurn,&args);
         backpropogate(leaf,result);
     }
     
@@ -635,8 +688,8 @@ void intializeRoot(MonteCarloNode * root, CGameState * game) {
     root->childNum = 0;
 
     root->parent = NULL;
-
-    copyCGameState(&root->game,game);
+    
+    root->game = *game;
     root->move.board = 10;
 
     if (root->game.gameWon == NO_WIN) {
@@ -657,7 +710,7 @@ MonteCarloNode * createNode(CGameState * game, MonteCarloNode * parent, Coord * 
 
     node->parent = parent;
 
-    copyCGameState(&node->game,game);
+    node->game = *game;
 
     if (move != NULL) {
         playTurn(&node->game,move->board,move->row,move->column);
@@ -724,26 +777,83 @@ double calcUCB(MonteCarloNode * node, double c) {
     return (node->T/node->N) + c * sqrt(log(parent->N) / node->N);
 }
 
-double rollout(MonteCarloNode * node,unsigned char player) {
-    CGameState game;
-    copyCGameState(&game,&node->game);
-    simulateGameFast(&game);
-
-    if (game.gameWon == STALEMATE) {
-        return (1/2);
+double rollout(MonteCarloNode * node,unsigned char player, MCST_Args * args) {
+    if (node->game.gameWon != NO_WIN) {
+        if (node->game.gameWon == STALEMATE) {
+            return 0.5;
+        } else if (node->game.currentTurn == player) {
+            return 1;
+        }
+        return 0;
     }
+    
+    if (args->threads <= 1) {
+        CGameState game;
+        game = node->game;
+        simulateGame(&game,args->rollout);
+        if (game.gameWon == STALEMATE) {
+            return 0.5;
+        } else if (game.currentTurn == player) {
+            return 1;
+        }
+        return 0;
+    } else {
+        int threadNum = args->threads <= MAX_THREADS ? args->threads : MAX_THREADS;
+        pthread_t t_id[MAX_THREADS];
+        RolloutArg r_arg[MAX_THREADS];
+        int errorCode;
+        if (t_id == NULL) {
+            fprintf(stderr, "ERROR: pthread_t malloc failed\n");
+            exit(1);
+        }
+        if (r_arg == NULL) {
+            fprintf(stderr, "ERROR: RolloutArg malloc failed\n");
+            exit(1);
+        }
 
-    if (game.currentTurn == player) {
-        return 1;
+        for (int i = 0; i < threadNum; i++) {
+            r_arg[i].game = node->game;
+            r_arg[i].policy = args->rollout;
+            r_arg[i].player = player;
+            r_arg[i].result = 0;
+            r_arg[i].seed = random();
+            errorCode = pthread_create((&t_id[i]), NULL, &rollout_thread, (void *)(&r_arg[i]));
+            if (errorCode)
+            {
+                fprintf(stderr, "ERROR: errorCode = pthread_create() failed\n");
+                exit(1);
+            }
+        }
+        double result = 0.0;
+        for (int i = 0; i < threadNum; i++)
+        {
+            pthread_join(t_id[i], NULL);
+            result += r_arg[i].result;
+        }
+        result = (double) result / (2*threadNum);
+        return result;
     }
+}
 
-    return 0;
+void * rollout_thread(void * r_arg) {
+    RolloutArg * arg = ((RolloutArg *) r_arg);
+    struct random_data buf;
+    char statebuf[STATESIZE];
+    initstate_r(arg->seed, statebuf, STATESIZE, &buf);
+
+    simulateGame_thread(&arg->game, arg->policy,&buf);
+
+    if (arg->game.gameWon == STALEMATE) {   
+        ((RolloutArg *) r_arg)->result = 1;
+    } else if (arg->game.currentTurn == arg->player) {
+        ((RolloutArg *) r_arg)->result = 2;
+    }
+    pthread_exit(NULL);
 }
 
 void backpropogate(MonteCarloNode * node, double result) {
     node->N += 1;
     node->T += result;
-
     if (node->parent != NULL) {
         backpropogate(node->parent,result);
     }

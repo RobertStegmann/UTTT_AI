@@ -6,19 +6,23 @@ BOARD_VALUE = 140
 GRID_VALUE = 10
 PLAYABLE_VAL = 16
 MAX_RUNS = 100
+DEFAULT_POLICY = 1
+THREADS = 1
 
 class HeuristicVal(ctypes.Structure):
     _fields_ = [("boardVal",ctypes.c_int),
                 ("gridVal",ctypes.c_int),
                 ("playableVal",ctypes.c_int),
                 ("maxRuns",ctypes.c_int),
-                ("index",ctypes.c_int)]
+                ("index",ctypes.c_int),
+                ("montePolicy",ctypes.c_int),
+                ("threads",ctypes.c_int)]
 
 class Heuristic:
     
-    def  __init__(self,*,boardVal = BOARD_VALUE, gridVal = GRID_VALUE,playableVal = PLAYABLE_VAL,maxRuns = MAX_RUNS):
+    def  __init__(self,*,boardVal = BOARD_VALUE, gridVal = GRID_VALUE,playableVal = PLAYABLE_VAL,maxRuns = MAX_RUNS,policy = DEFAULT_POLICY,threads = THREADS):
         index = -1
-        self.values = HeuristicVal(boardVal,gridVal,playableVal,maxRuns,index)
+        self.values = HeuristicVal(boardVal,gridVal,playableVal,maxRuns,index,policy,threads)
     
     @abstractmethod
     def Heuristic(self,game: g.GameState):
@@ -174,9 +178,9 @@ class Heuristic:
     
 class StaticHeuristic(Heuristic):
     
-    def  __init__(self,*,boardVal = BOARD_VALUE, gridVal = GRID_VALUE,playableVal = PLAYABLE_VAL,maxRuns = MAX_RUNS):
+    def  __init__(self,*,boardVal = BOARD_VALUE, gridVal = GRID_VALUE,playableVal = PLAYABLE_VAL,maxRuns = MAX_RUNS,policy = DEFAULT_POLICY,threads = THREADS):
         index = 1
-        self.values = HeuristicVal(boardVal,gridVal,playableVal,maxRuns,index)
+        self.values = HeuristicVal(boardVal,gridVal,playableVal,maxRuns,index,policy,threads)
     
     def heuristic(self,game:g.GameState):
         evaluation = self.evaluateBoard(game)
@@ -275,61 +279,83 @@ class StaticHeuristic(Heuristic):
                         evaluation += gridEval  
                         
         return evaluation
-   
-    def toString(self):
-        return "StaticHeuristic\n" + self.valToString()
+    
+    def toString(self,verbose):
+        string = "StaticHeuristic"
+        if verbose:
+            string = string + self.valToString()
+        return string 
     
     def valToString(self):
-        return ("Board Value: " + str(self.values.boardVal) + 
+        return ("\nBoard Value: " + str(self.values.boardVal) + 
                 " Grid Value: " +  str(self.values.gridVal)) 
 
 class StaticHeuristicC(Heuristic):    
     
-    def  __init__(self,*,boardVal = BOARD_VALUE, gridVal = GRID_VALUE,playableVal = PLAYABLE_VAL,maxRuns = MAX_RUNS):
+    def  __init__(self,*,boardVal = BOARD_VALUE, gridVal = GRID_VALUE,playableVal = PLAYABLE_VAL,maxRuns = MAX_RUNS,policy = DEFAULT_POLICY,threads = THREADS):
         index = 0
-        self.values = HeuristicVal(boardVal,gridVal,playableVal,maxRuns,index)
+        self.values = HeuristicVal(boardVal,gridVal,playableVal,maxRuns,index,policy,threads)
     
     def heuristic(self,game:g.GameState):
         return g.clibrary.staticHeuristicWrapper(game.toCGameState(),self.values)
    
-    def toString(self):
-        return "StaticHeuristic using C\n" + self.valToString()
+    def toString(self,verbose):
+        string = "StaticHeuristic using C"
+        if verbose:
+            string = string + self.valToString()
+        return string 
     
     def valToString(self):
-        return ("Board Value: " + str(self.values.boardVal) + 
+        return (":\nBoard Value: " + str(self.values.boardVal) + 
                 " Grid Value: " +  str(self.values.gridVal)) 
     
 class PlayableBoardHeuristic(Heuristic):
     
-    def  __init__(self,*,boardVal = BOARD_VALUE, gridVal = GRID_VALUE,playableVal = PLAYABLE_VAL,maxRuns = MAX_RUNS):
+    def  __init__(self,*,boardVal = BOARD_VALUE, gridVal = GRID_VALUE,playableVal = PLAYABLE_VAL,maxRuns = MAX_RUNS,policy = DEFAULT_POLICY,threads = THREADS):
         index = 1
-        self.values = HeuristicVal(boardVal,gridVal,playableVal,maxRuns,index)
+        self.values = HeuristicVal(boardVal,gridVal,playableVal,maxRuns,index,policy,threads)
     
     def heuristic(self,game:g.GameState):
         return g.clibrary.playableBoardHeuristicWrapper(game.toCGameState(),self.values)
-   
-    def toString(self):
-        return "PlayableBoardHeuristic\n" + self.valToString()
+    
+    def toString(self,verbose):
+        string =  "PlayableBoardHeuristic"
+        if verbose:
+            string = string + self.valToString()
+        return string 
     
     def valToString(self):
-        return ("Board Value: " + str(self.values.boardVal) + 
+        return (":\nBoard Value: " + str(self.values.boardVal) + 
                 " Grid Value: " +  str(self.values.gridVal) +
                 " Playable Value: " +  str(self.values.playableVal))
         
 class MonteCarloHeuristic(Heuristic):
     
-    def  __init__(self,*,boardVal = BOARD_VALUE, gridVal = GRID_VALUE,playableVal = PLAYABLE_VAL,maxRuns = MAX_RUNS):
+    def  __init__(self,*,boardVal = BOARD_VALUE, gridVal = GRID_VALUE,playableVal = PLAYABLE_VAL,maxRuns = MAX_RUNS,policy = DEFAULT_POLICY,threads = THREADS):
         index = 2
-        self.values = HeuristicVal(boardVal,gridVal,playableVal,maxRuns,index)
+        
+        if policy < 0 or policy > 2:
+            actualPolicy = DEFAULT_POLICY
+        else:
+            actualPolicy = policy
+        
+        if threads < 1:
+            threads = THREADS
+        
+        self.values = HeuristicVal(boardVal,gridVal,playableVal,maxRuns,index,actualPolicy,threads)
     
     def heuristic(self,game:g.GameState):
         return g.clibrary.monteCarloHeuristicWrapper(game.toCGameState(),self.values)
    
-    def toString(self):
-        return "MonteCarloHeuristic: " + self.valToString()
+    def toString(self,verbose):
+        string = "MonteCarloHeuristic: "
+        if verbose:
+            string = string + self.valToString()
+        return string 
     
     def valToString(self):
-        return ("# of Runs: " + str(self.values.maxRuns))
+        return ("# of Runs: " + str(self.values.maxRuns)
+                + " Policy: " + str(self.values.montePolicy))
 
     
     
