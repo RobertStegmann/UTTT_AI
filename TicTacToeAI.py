@@ -31,7 +31,27 @@ class MCST_Args(ctypes.Structure):
     _fields_ = [("rollout",ctypes.c_int),
                 ("maxRuns",ctypes.c_int),
                 ("c",ctypes.c_double),
-                ("threads",ctypes.c_int)]
+                ("threads",ctypes.c_int),
+                ("shuffle",ctypes.c_bool),
+                ("bias",ctypes.c_int),
+                ("scale",ctypes.c_double),
+                ("bias_multiplier",ctypes.c_double)]
+    
+
+    
+# class MonteCarloNode(ctypes.Structure):
+#     _fields_ = [("game",g.CGameState),
+#                 ("parent",ctypes.pointer(MonteCarloNode)),
+#                 ("possibleMoves",MoveList),
+#                 ("children",ctypes.pointer((ctypes.pointer(MonteCarloNode)))),             
+#                 ("move",Coord),
+#                 ("childNum",ctypes.c_int),
+#                 ("N",ctypes.c_double),
+#                 ("T",ctypes.c_double),
+#                 ("heuristic",ctypes.c_double),
+#                 ("ID",ctypes.c_int)]
+        
+
               
 
 class TicTacToeAI:
@@ -42,6 +62,12 @@ class TicTacToeAI:
     @abstractmethod
     def toString(self):
         return "TicTacToeAI"
+    
+    def cleanUp(self):
+        pass
+    
+    def initialize(self):
+        pass
 
     def isWinBoard(game: g.GameState,board: int,row: int,column: int):
         if (game.board[board,row,column] != g.OPEN_VAL):
@@ -281,10 +307,14 @@ class ChooseMinimax(TicTacToeAI):
     
 class MonteCarloST(TicTacToeAI):
     
-    def __init__(self,max_iter,*, c = math.sqrt(2), policy = h.DEFAULT_POLICY, threads = 1,verbose = False):
+    def __init__(self,max_iter,*, c = math.sqrt(2), policy = h.DEFAULT_POLICY, threads = 1,verbose = False, shuffle = True, bias = 2, scale = 0.025,multiplier=1.0):
         self.verbose = verbose
         g.clibrary.monteCarloTreeSearch.restype = Coord
-        self.args = MCST_Args(policy,max_iter,c,threads)
+        if bias < 0 or bias > 2:
+            bias_val = 0
+        else:
+            bias_val = bias
+        self.args = MCST_Args(policy,max_iter,c,threads,shuffle,bias_val,scale,multiplier)
     
     def chooseMove(self,game:g.GameState):
         coord = g.clibrary.monteCarloTreeSearch(game.toCGameState(),self.args)
@@ -294,8 +324,39 @@ class MonteCarloST(TicTacToeAI):
     def toString(self):
         string = "MonteCarloST: " + str(self.args.maxRuns) + " Iterations"
         if self.verbose:
-            string = string + ", c=" + str(self.args.c) +  " Policy: " + str(self.args.rollout) + " # of threads: " + str(self.args.threads)
+            string = string + ", c=" + str(self.args.c) +  " Policy: " + str(self.args.rollout) + " # of threads: " + str(self.args.threads) + ", Shuffle: " + str(self.args.shuffle) + ", Bias: " + str(self.args.bias) + ", Scale: " + str(self.args.scale) + ", Multiplier: " + str(self.args.bias_multiplier)
         return string
+    
+class MonteCarloST_SF(TicTacToeAI):
+    
+    def __init__(self,max_iter,*, c = math.sqrt(2), threads = 1,verbose = False, shuffle = True, bias = 2, scale = 0.025,multiplier=1.0):
+        self.verbose = verbose
+        g.clibrary.monteCarloTreeSearch_sf.restype = Coord
+        g.clibrary.initialize.restype = (ctypes.POINTER(ctypes.POINTER(ctypes.c_int)))
+        if bias < 0 or bias > 2:
+            bias_val = 0
+        else:
+            bias_val = bias
+        self.args = MCST_Args(h.DEFAULT_POLICY,max_iter,c,1,True,2,scale,multiplier)
+    
+    def chooseMove(self,game:g.GameState):
+        coord = g.clibrary.monteCarloTreeSearch_sf(game.toCGameState(),self.args,self.root)
+        move = (coord.board,coord.row,coord.column)
+        return move
+    
+    def toString(self):
+        string = "MonteCarloST_SF: " + str(self.args.maxRuns) + " Iterations"
+        if self.verbose:
+            string = string + ", c=" + str(self.args.c) + ", Scale: " + str(self.args.scale) + ", Multiplier: " + str(self.args.bias_multiplier)
+        return string
+    
+    def initialize(self):
+        self.root = g.clibrary.initialize()
+        
+    def cleanUp(self):
+        g.clibrary.freeTree(self.root)
+        
+    
     
     
 class MonteCarloSTPy(TicTacToeAI):

@@ -17,6 +17,8 @@ def simulateGames(AI_1:AI.TicTacToeAI, AI_2:AI.TicTacToeAI, gameNum=int):
     for r in range(0,2):
         for i in range(0,rounds):
             game = g.GameState()
+            Player1.initialize()
+            Player2.initialize()
             while (game.gameWon == g.NO_WIN):
                 if (game.currentTurn == 1):
                     t_start = process_time()  
@@ -34,6 +36,8 @@ def simulateGames(AI_1:AI.TicTacToeAI, AI_2:AI.TicTacToeAI, gameNum=int):
                 wins[r][game.currentTurn - 1] += 1
             else:
                 stalemates = stalemates + 1
+            Player1.cleanUp()
+            Player2.cleanUp()
         Player1 = AI_2
         Player2 = AI_1
     
@@ -60,28 +64,33 @@ def simulateGames(AI_1:AI.TicTacToeAI, AI_2:AI.TicTacToeAI, gameNum=int):
 # simulateGames(monteAI_chooseWin,monteAI_chooseWin_lower,1000)
 # simulateGames(monteAI_chooseWin_low,monteAI_chooseWin_lower,1000)
 
-monteAI_nothread = AI.MonteCarloST(2000,threads = 1,verbose=True)
-monteAI_threads_same_rollout = [
-                   AI.MonteCarloST(3000,threads = 2,verbose=True),
-                   AI.MonteCarloST(2000,threads = 3,verbose=True),
-                   AI.MonteCarloST(1500,threads = 4,verbose=True),
-                   ]
+#monteAI_no_multiplier = AI.MonteCarloST(2000,verbose=True,multiplier=1.0)
 
-monteAI_threads_same_iteration = [AI.MonteCarloST(6000,threads = 2,verbose=True),
-                   AI.MonteCarloST(6000,threads = 3,verbose=True),
-                   AI.MonteCarloST(6000,threads = 4,verbose=True),
-                   ]
-minimax_monte = AI.ChooseMinimax(2,h.MonteCarloHeuristic(maxRuns=600,threads=1))
+monteAI = AI.MonteCarloST(4000)
+monteAI_sf = AI.MonteCarloST_SF(4000)
 
-minimax_monte_thread = [AI.ChooseMinimax(2,h.MonteCarloHeuristic(maxRuns=600,threads=2),verbose=True),
-                        AI.ChooseMinimax(2,h.MonteCarloHeuristic(maxRuns=600,threads=3),verbose=True), 
-                        AI.ChooseMinimax(2,h.MonteCarloHeuristic(maxRuns=600,threads=4),verbose=True)
-                    ]
-for ai in minimax_monte_thread:
-    simulateGames(ai,minimax_monte,500)
+minimax = [AI.ChooseMinimax(1,h.StaticHeuristic()),
+           AI.ChooseMinimax(2,h.StaticHeuristic()),
+           AI.ChooseMinimax(3,h.StaticHeuristic()),
+           AI.ChooseMinimax(4,h.StaticHeuristic()),
+           AI.ChooseMinimax(5,h.StaticHeuristic()),
+           AI.ChooseMinimax(6,h.StaticHeuristic()),]
 
-# for ai in monteAI_threads_same_rollout:
-#     simulateGames(ai,monteAI_nothread,500)
+#monte_heur = [AI.ChooseMinimax(1,h.MonteCarloHeuristic(maxRuns=600)),
+#              AI.ChooseMinimax(2,h.MonteCarloHeuristic(maxRuns=600))]
+
+monte_heur = AI.ChooseMinimax(3,h.MonteCarloHeuristic(maxRuns=600))
+simulateGames(monteAI_sf,monte_heur,500)
+simulateGames(monteAI,monte_heur,500)
+
+#
+# for ai in monte_heur:
+#     simulateGames(monteAI_sf,ai,1000)
+#     simulateGames(monteAI,ai,1000)
+
+# for ai in minimax:
+#     simulateGames(monteAI_sf,ai,1000)
+#     simulateGames(monteAI,ai,1000)
     
 #for ai in monteAI_threads_same_iteration:
 #    simulateGames(ai,monteAI_nothread,500)
@@ -95,4 +104,3 @@ for ai in minimax_monte_thread:
 # minimax2 = AI.ChooseMinimax(4,h.PlayableBoardHeuristic())
 
 # simulateGames(minimax1,minimax2,1000)        
-

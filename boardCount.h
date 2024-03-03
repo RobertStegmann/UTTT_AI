@@ -88,6 +88,10 @@ typedef struct {
     int maxRuns;
     double c;
     int threads;
+    bool shuffle;
+    int bias;
+    double scale;
+    double bias_multiplier;
 } MCST_Args;
 
 typedef struct MonteCarloNode {
@@ -99,6 +103,7 @@ typedef struct MonteCarloNode {
     int childNum;
     double N;
     double T;
+    double heuristic;
 } MonteCarloNode;
 
 typedef struct RolloutArg {
@@ -134,6 +139,8 @@ Coord *chooseMoveFullBoard(CGameState *game);
 Coord *chooseMoveSingleGrid(CGameState *game, unsigned char board);
 Coord * getMoves(CGameState *game);
 void revertTurn(CGameState *game, int board, int row, int column, unsigned char previousBoard);
+
+bool isSameBoard(CGameState * game1, CGameState * game2);
 
 void chooseMoveListSingleGrid(CGameState *game, MoveList * moves, unsigned char board);
 void chooseMoveListFullBoard(CGameState *game, MoveList * moves);
@@ -171,14 +178,16 @@ int simulateGame(CGameState * game, int policy);
 int monteCarloHeuristic(CGameState * game, HeuristicVal * val);
 int monteCarloHeuristicWrapper(CGameState game,HeuristicVal val);
 
+double getHeuristicDouble(CGameState * game, MCST_Args * args, unsigned char player);
+
 Coord monteCarloTreeSearch(CGameState game, MCST_Args args);
 
-double calcUCB(MonteCarloNode * node, double c);
-void intializeRoot(MonteCarloNode * root, CGameState * game);
-MonteCarloNode * createNode(CGameState * game, MonteCarloNode * parent, Coord * move);
-void expand(MonteCarloNode * node);
-MonteCarloNode * traverse(MonteCarloNode * node, double c);
-double calcUCB(MonteCarloNode * node, double c);
+
+void intializeRoot(MonteCarloNode * root, CGameState * game, MCST_Args * args,unsigned char player);
+MonteCarloNode * createNode(CGameState * game, MonteCarloNode * parent, Coord * move, MCST_Args * args, unsigned char player);
+void expand(MonteCarloNode * node, MCST_Args * args, unsigned char player);
+MonteCarloNode * traverse(MonteCarloNode * node, MCST_Args * args, unsigned char player);
+double calcUCB(MonteCarloNode * node, MCST_Args * args);
 double rollout(MonteCarloNode * node,unsigned char player, MCST_Args * args);
 void backpropogate(MonteCarloNode * node, double result);
 void freeMonteCarloTree(MonteCarloNode * root);
@@ -191,5 +200,14 @@ int chooseWinningMove_thread(CGameState * game, MoveList * moves, struct random_
 int chooseRandomMove_thread(CGameState * game, MoveList * moves, struct random_data * buf);
 
 void * monteCarloHeuristic_thread(void * args);
+
+int updateRoot(CGameState * game, MonteCarloNode ** prev_root);
+int ** initialize();
+void freeTree(int ** prev_root);
+void freeUnused(MonteCarloNode * node, int ID);
+Coord monteCarloTreeSearch_sf(CGameState game, MCST_Args args, int ** prev_root);
+MonteCarloNode * intializeRoot_sf(CGameState * game, MCST_Args * args,unsigned char player);
+
+MonteCarloNode * getNewRoot (CGameState * game, MonteCarloNode ** prev_root);
 
 #endif

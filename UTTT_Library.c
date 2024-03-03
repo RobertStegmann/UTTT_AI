@@ -148,7 +148,6 @@ int staticHeuristic(CGameState * game, HeuristicVal * val) {
     int gridEval = 0;
     int r = 0;
     int c = 0;
-    int a = 2;
     int otherCoords[3][2] = {{1,2},{0,2},{0,1}};
     int upperRightDiagonal[3][2][2] = {{{1,1},{2,0}},
                                         {{0,2},{2,0}},
@@ -483,7 +482,6 @@ int playableBoardHeuristic(CGameState * game, HeuristicVal * val) {
     int gridEval = 0;
     int r = 0;
     int c = 0;
-    int a = 2;
     int otherCoords[3][2] = {{1,2},{0,2},{0,1}};
     int upperRightDiagonal[3][2][2] = {{{1,1},{2,0}},
                                         {{0,2},{2,0}},
@@ -638,6 +636,7 @@ void * monteCarloHeuristic_thread(void * args) {
             ((MCHuerArg *) args)->eval += tempGame.currentTurn == X_VAL ? 1 : -1;
         }
     }
+    return NULL;
 }
 
 int monteCarloHeuristicWrapper(CGameState game,HeuristicVal val) {
@@ -647,13 +646,13 @@ int monteCarloHeuristicWrapper(CGameState game,HeuristicVal val) {
 
 Coord monteCarloTreeSearch(CGameState game, MCST_Args args) {
     srandom(time(NULL));
-    int bestMoveIndex = 0;
+
     MonteCarloNode root;
     MonteCarloNode * leaf;
     double result = 0;
-    intializeRoot(&root,&game);
+    intializeRoot(&root,&game,&args,game.currentTurn);
     for (int i = 0; i < args.maxRuns; i++) {
-        leaf = traverse(&root,args.c);
+        leaf = traverse(&root,&args,root.game.currentTurn);
         result = rollout(leaf,root.game.currentTurn,&args);
         backpropogate(leaf,result);
     }
@@ -678,11 +677,10 @@ Coord monteCarloTreeSearch(CGameState game, MCST_Args args) {
     Coord bestMove = bestChild->move;
 
     freeMonteCarloTree(&root);
-    
     return bestMove;
 }
 
-void intializeRoot(MonteCarloNode * root, CGameState * game) {
+void intializeRoot(MonteCarloNode * root, CGameState * game, MCST_Args * args,unsigned char player) {
     root->N = 0;
     root->T = 0;
     root->childNum = 0;
@@ -692,6 +690,10 @@ void intializeRoot(MonteCarloNode * root, CGameState * game) {
     root->game = *game;
     root->move.board = 10;
 
+    if (args->bias != 0) {
+        root->heuristic = getHeuristicDouble(&root->game,args,player);
+    }    
+
     if (root->game.gameWon == NO_WIN) {
         getMovesList(&root->game,&root->possibleMoves);
     } else {
@@ -699,10 +701,19 @@ void intializeRoot(MonteCarloNode * root, CGameState * game) {
     }
     root->children = NULL;
 
-    expand(root);
+    expand(root, args,player);
 }
 
-MonteCarloNode * createNode(CGameState * game, MonteCarloNode * parent, Coord * move) {
+double getHeuristicDouble(CGameState * game, MCST_Args * args, unsigned char player) {
+    HeuristicVal val;
+    val.boardVal = BOARD_VALUE;
+    val.gridVal = GRID_VALUE;
+    val.playableVal = PLAYABLE_VALUE;
+    int sign = player == X_VAL ? 1 : -1;
+    return (0.5*tanh(args->scale*sign*playableBoardHeuristic(game,&val)))+0.5; 
+}
+
+MonteCarloNode * createNode(CGameState * game, MonteCarloNode * parent, Coord * move, MCST_Args * args, unsigned char player) {
     MonteCarloNode * node = malloc(sizeof(MonteCarloNode));
     node->N = 0;
     node->T = 0;
@@ -711,6 +722,7 @@ MonteCarloNode * createNode(CGameState * game, MonteCarloNode * parent, Coord * 
     node->parent = parent;
 
     node->game = *game;
+    
 
     if (move != NULL) {
         playTurn(&node->game,move->board,move->row,move->column);
@@ -718,55 +730,78 @@ MonteCarloNode * createNode(CGameState * game, MonteCarloNode * parent, Coord * 
     } else {
         node->move.board = 10;
     }
+
+    if (args->bias != 0) {
+        node->heuristic = getHeuristicDouble(&node->game,args,player);
+    }
     
-    int i = 0;
     if (node->game.gameWon == NO_WIN) {
         getMovesList(&node->game,&node->possibleMoves);
     } else {
         node->possibleMoves.length = 0;
     }
-
     node->children = NULL;
+    return node;
 }
 
-void expand(MonteCarloNode * node) {
+void expand(MonteCarloNode * node, MCST_Args * args, unsigned char player) {
     if (node->possibleMoves.length == 0) {
         return;
     }
-    shuffleMoveList(&node->possibleMoves);
+    if (args->shuffle) {
+        shuffleMoveList(&node->possibleMoves);
+    }
     node->children = malloc(sizeof(MonteCarloNode *)*node->possibleMoves.length);
     for (int i = 0; i < node->possibleMoves.length ; i++) {
-        node->children[i] = createNode(&node->game,node,&(node->possibleMoves.moves[i]));
+        node->children[i] = createNode(&node->game,node,&(node->possibleMoves.moves[i]),args,player);
     }
     node->childNum = node->possibleMoves.length;
 }
 
-MonteCarloNode * traverse(MonteCarloNode * node, double c) {
+MonteCarloNode * traverse(MonteCarloNode * node, MCST_Args * args, unsigned char player) {
     MonteCarloNode * bestChild = NULL;
+    double best_ucb;
+    double ucb = 0;
     if (node->childNum == 0) {
         if (node->N == 0 ||  node->possibleMoves.length  == 0) {
             return node;
         }
-        expand(node);
+        expand(node,args,player);
+        if (args->bias == 2) {
+            bestChild = node->children[0];
+            best_ucb = calcUCB(node->children[0],args);
+
+            for (int i = 1; i < node->childNum && best_ucb != INFINITY; i++) {
+                ucb = calcUCB(node->children[i],args);
+                if (ucb > best_ucb) {
+                    best_ucb = ucb;
+                    bestChild = node->children[i];
+                }
+            }
+            return bestChild;
+        }
         return node->children[0];
     }
 
     bestChild = node->children[0];
-    double best_ucb = calcUCB(node->children[0],c);
-    double ucb = 0;
+    best_ucb = calcUCB(node->children[0],args);
+    ucb = 0;
 
     for (int i = 1; i < node->childNum && best_ucb != INFINITY; i++) {
-        ucb = calcUCB(node->children[i],c);
+        ucb = calcUCB(node->children[i],args);
         if (ucb > best_ucb) {
             best_ucb = ucb;
             bestChild = node->children[i];
         }
     }
-    return traverse(bestChild,c);
+    return traverse(bestChild,args,player);
 }
 
-double calcUCB(MonteCarloNode * node, double c) {
+double calcUCB(MonteCarloNode * node, MCST_Args * args) {
     if (node->N == 0) {
+        if (args->bias == 2) {
+            return args->bias_multiplier*node->heuristic + 10;
+        }
         return INFINITY;
     }
 
@@ -774,7 +809,10 @@ double calcUCB(MonteCarloNode * node, double c) {
     if (parent == NULL) {
         parent = node;
     }
-    return (node->T/node->N) + c * sqrt(log(parent->N) / node->N);
+    if (args->bias == 0) {
+        return (node->T/node->N) + args->c * sqrt(log(parent->N) / node->N);  
+    }
+    return (node->T/node->N) + args->c * sqrt(log(parent->N) / node->N) +  (args->bias_multiplier*node->heuristic/node->N);
 }
 
 double rollout(MonteCarloNode * node,unsigned char player, MCST_Args * args) {
@@ -802,14 +840,6 @@ double rollout(MonteCarloNode * node,unsigned char player, MCST_Args * args) {
         pthread_t t_id[MAX_THREADS];
         RolloutArg r_arg[MAX_THREADS];
         int errorCode;
-        if (t_id == NULL) {
-            fprintf(stderr, "ERROR: pthread_t malloc failed\n");
-            exit(1);
-        }
-        if (r_arg == NULL) {
-            fprintf(stderr, "ERROR: RolloutArg malloc failed\n");
-            exit(1);
-        }
 
         for (int i = 0; i < threadNum; i++) {
             r_arg[i].game = node->game;
@@ -874,4 +904,125 @@ void freeMonteCarloNode(MonteCarloNode * node) {
 
     free(node->children);
     free(node);
+}
+
+
+int ** initialize() {
+    MonteCarloNode ** root_pointer = malloc(sizeof(MonteCarloNode *));
+    if (root_pointer == NULL) {
+        fprintf(stderr, "ERROR: initialize malloc failed\n");
+        exit(1);
+    }
+    *root_pointer = NULL;
+    return (int **) root_pointer;
+}
+
+void freeTree(int ** prev_root) {
+    MonteCarloNode ** pr = (MonteCarloNode **) prev_root;
+    freeMonteCarloTree(*pr);
+    free(pr);
+}
+
+
+MonteCarloNode * getNewRoot (CGameState * game, MonteCarloNode ** prev_root) {
+    MonteCarloNode * root = *(prev_root);
+    MonteCarloNode * child;
+    MonteCarloNode * newRoot = NULL;
+    for (int i = 0; i < root->childNum; i++) {
+        child = root->children[i];
+        for (int j = 0; j < child->childNum; j++) {
+            if (isSameBoard(game, &(child->children[j]->game))) {
+                newRoot = child->children[j];
+                newRoot->parent = NULL;
+                newRoot->move.board = 10;
+            } else {
+                freeMonteCarloNode(child->children[j]);
+            }
+        }
+        free(child->children);
+        free(child);
+    }
+    free(root->children);   
+    free(root);
+    return newRoot;
+}
+
+Coord monteCarloTreeSearch_sf(CGameState game, MCST_Args args, int ** prev_root) {
+    srandom(time(NULL));
+    MonteCarloNode * root = NULL;
+    MonteCarloNode * leaf;
+    double result = 0;
+    MonteCarloNode ** prev = (MonteCarloNode **) prev_root;
+    MonteCarloNode * pr;
+    if (*prev == NULL) {
+        root = intializeRoot_sf(&game,&args,game.currentTurn);
+        *prev = root;
+    } else {
+        root = getNewRoot(&game,prev);
+
+        if (root == NULL) {
+            root = intializeRoot_sf(&game,&args,game.currentTurn);
+            *prev = root;
+        }
+
+        *prev = root;
+    }    
+    for (int i = 0; i < args.maxRuns; i++) {
+        leaf = traverse(root,&args,root->game.currentTurn);
+        result = rollout(leaf,root->game.currentTurn,&args);
+        backpropogate(leaf,result);
+    }
+
+    double best_score = -INFINITY;
+    double score = 0;
+    MonteCarloNode * bestChild = NULL;
+
+    for (int i = 0; i < root->childNum; i++) {
+        if (root->children[i]->N == 0) {
+            score = 0;
+        } else {
+            score = (root->children[i]->T / root->children[i]->N);
+        }
+        
+        if (score > best_score) {
+            best_score = score;
+            bestChild = root->children[i];
+        }
+    }
+    
+    Coord bestMove = bestChild->move;
+
+    return bestMove;
+}
+
+MonteCarloNode * intializeRoot_sf(CGameState * game, MCST_Args * args,unsigned char player) {
+    MonteCarloNode * root = malloc(sizeof(MonteCarloNode));
+
+    if (root == NULL) {
+        fprintf(stderr, "ERROR: root malloc failed\n");
+        exit(1);
+    }
+
+    root->N = 0;
+    root->T = 0;
+    root->childNum = 0;
+
+    root->parent = NULL;
+    
+    root->game = *game;
+
+    root->move.board = 10;
+
+    if (args->bias != 0) {
+        root->heuristic = getHeuristicDouble(&root->game,args,player);
+    }    
+
+    if (root->game.gameWon == NO_WIN) {
+        getMovesList(&root->game,&root->possibleMoves);
+    } else {
+        root->possibleMoves.length = 0;
+    }
+    root->children = NULL;
+    expand(root, args,player);
+    return root;
 }

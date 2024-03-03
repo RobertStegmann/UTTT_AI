@@ -331,7 +331,7 @@ class PlayableBoardHeuristic(Heuristic):
         
 class MonteCarloHeuristic(Heuristic):
     
-    def  __init__(self,*,boardVal = BOARD_VALUE, gridVal = GRID_VALUE,playableVal = PLAYABLE_VAL,maxRuns = MAX_RUNS,policy = DEFAULT_POLICY,threads = THREADS):
+    def  __init__(self,*,boardVal = BOARD_VALUE, gridVal = GRID_VALUE,playableVal = PLAYABLE_VAL,maxRuns = MAX_RUNS,policy = DEFAULT_POLICY,threads = 3):
         index = 2
         
         if policy < 0 or policy > 2:
@@ -348,14 +348,14 @@ class MonteCarloHeuristic(Heuristic):
         return g.clibrary.monteCarloHeuristicWrapper(game.toCGameState(),self.values)
    
     def toString(self,verbose):
-        string = "MonteCarloHeuristic: "
+        string = "MonteCarloHeuristic: # of Runs: " + str(self.values.maxRuns) 
         if verbose:
             string = string + self.valToString()
         return string 
     
     def valToString(self):
-        return ("# of Runs: " + str(self.values.maxRuns)
-                + " Policy: " + str(self.values.montePolicy))
+        return ("\n Policy: " + str(self.values.montePolicy)
+                + " # of threads " + str(self.values.threads))
 
     
     

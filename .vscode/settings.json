@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "*.html": "html",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "cmath": "c",
+        "boardcount.h": "c"
     }
 }

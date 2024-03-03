@@ -444,8 +444,6 @@ int simulateGame(CGameState * game, int policy) {
         chooseWinningMove,
         chooseWinLose
     };
-    int moveCount = 0;
-    int currentBoard = 0;
     int moveNum = 0;
     while (game->gameWon == NO_WIN) {
         getMovesList(game,&moves);
@@ -518,8 +516,6 @@ int simulateGame_thread(CGameState * game, int policy,struct random_data * buf) 
         chooseWinningMove_thread,
         chooseWinLose_thread
     };
-    int moveCount = 0;
-    int currentBoard = 0;
     int moveNum = 0;
     while (game->gameWon == NO_WIN) {
         getMovesList(game,&moves);
@@ -527,4 +523,17 @@ int simulateGame_thread(CGameState * game, int policy,struct random_data * buf) 
         playTurn(game, moves.moves[moveNum].board, moves.moves[moveNum].row, moves.moves[moveNum].column);
     }
     return game->gameWon;
+}
+
+bool isSameBoard(CGameState * game1, CGameState * game2){
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < ROW_DIMENSION; j++) {
+            for (int k = 0; k < COL_DIMENSION; k++) {
+                if (game1->board[i][j][k] != game2->board[i][j][k]) {
+                    return false;
+                }
+            } 
+        }
+    }
+    return true;
 }

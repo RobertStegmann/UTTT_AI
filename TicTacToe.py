@@ -2,6 +2,8 @@ import GameState as g
 import TicTacToeAI as AI
 import Heuristics as h
 
+import Model as m
+
 # Pygame UI is based on https://github.com/russs123/TicTacToe/blob/master/tictactoe.py
 
 # IMPORTANT: Run Xlaunch when testing in WSL with Disable Access Control
@@ -101,13 +103,14 @@ pygame.display.update()
 click = False
 mousePosition = []
 
+model = m.HeuristicNetwork()
+
 
 # Run until user quits
 run = True 
-
-AIPlayer = AI.MonteCarloST(1000,threads=2)
+AIPlayer  = AI.MonteCarloST_SF(50000)
 #AIPlayer = AI.ChooseMinimax(7,h.PlayableBoardHeuristic())
-
+AIPlayer.initialize()
 while run:  
     # Event handlers
     for event in pygame.event.get():
@@ -115,6 +118,9 @@ while run:
             run = False
         if event.type == pygame.MOUSEBUTTONDOWN and click == False:
             click = True
+        if event.type == pygame.QUIT:
+            AIPlayer.cleanUp()
+            pygame.quit()
         if event.type == pygame.MOUSEBUTTONUP and click:
             click = False
             
@@ -135,6 +141,9 @@ while run:
                 
                 move = game.playTurn(board,gridRow,gridColumn)
 
+                board = m.HeuristicNetwork.gameToTorch(game, g.X_VAL)
+                print(model(board))
+
                 if move != -1:         
                     updateDraw()
                     
@@ -146,7 +155,7 @@ while run:
             updateDraw()
     
             
-            
+AIPlayer.cleanUp()           
         
         
 pygame.quit()
