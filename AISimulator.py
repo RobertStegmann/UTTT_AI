@@ -66,23 +66,12 @@ def simulateGames(AI_1:AI.TicTacToeAI, AI_2:AI.TicTacToeAI, gameNum=int):
 
 #monteAI_no_multiplier = AI.MonteCarloST(2000,verbose=True,multiplier=1.0)
 
-monteAI = AI.MonteCarloST(4000)
-monteAI_sf = AI.MonteCarloST_SF(4000)
 
-minimax = [AI.ChooseMinimax(1,h.StaticHeuristic()),
-           AI.ChooseMinimax(2,h.StaticHeuristic()),
-           AI.ChooseMinimax(3,h.StaticHeuristic()),
-           AI.ChooseMinimax(4,h.StaticHeuristic()),
-           AI.ChooseMinimax(5,h.StaticHeuristic()),
-           AI.ChooseMinimax(6,h.StaticHeuristic()),]
-
-#monte_heur = [AI.ChooseMinimax(1,h.MonteCarloHeuristic(maxRuns=600)),
-#              AI.ChooseMinimax(2,h.MonteCarloHeuristic(maxRuns=600))]
+monteAI_sf = AI.MonteCarloST_SF(500)
+monteAI_sf2 = AI.MonteCarloST_SF(500)
 
 monte_heur = AI.ChooseMinimax(3,h.MonteCarloHeuristic(maxRuns=600))
-simulateGames(monteAI_sf,monte_heur,500)
-simulateGames(monteAI,monte_heur,500)
-
+simulateGames(monteAI_sf,monteAI_sf2,10)
 #
 # for ai in monte_heur:
 #     simulateGames(monteAI_sf,ai,1000)

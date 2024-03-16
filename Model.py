@@ -27,9 +27,9 @@ class HeuristicNetwork(nn.Module):
                             nn.LeakyReLU(),
                             nn.Linear(1024, 1024),
                             nn.LeakyReLU(),
-                            nn.Linear(1024, 1),
-                            nn.Sigmoid(),)
-        
+                            nn.Linear(1024, 3),
+                            nn.Softmax(dim=0))
+                            
         self.flatten = nn.Flatten(0)
          
 
@@ -41,7 +41,8 @@ class HeuristicNetwork(nn.Module):
         playableBoards = HeuristicNetwork.getRotations(input[2])
         playableBoards = self.playableBoardConv(playableBoards)
         
-        full = self.flatten(torch.stack((boards,boardsWon)))   
+        full = self.flatten(torch.stack((boards,boardsWon)))
+         
         output = self.linearLayer(full)
         return output
     
@@ -55,30 +56,54 @@ class HeuristicNetwork(nn.Module):
                          torch.rot90(torch.flip(tensor,(1,)),2,(1,2)),
                          torch.rot90(torch.flip(tensor,(1,)),3,(1,2))))
 
-    def save(self, file_name='HeuristicNetwork.pth'):
-        model_folder_path = './NeuralNet/model'
+    def save(self, optimizer, epoch, file_name='HeuristicNetwork.pth'):
+        model_folder_path = './NeuralNet/'
         if not os.path.exists(model_folder_path):
             os.makedirs(model_folder_path)
 
         file_name = os.path.join(model_folder_path, file_name)
-        torch.save(self.state_dict(), file_name)
         
-    def load(file_name='HeuristicNetwork.pth'):
-        model_file =  f'./NeuralNet/model{file_name}'
+        torch.save({
+            'epoch': epoch,
+            'model_state_dict': self.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            }, file_name)
+        
+    def fileExists(file_name='HeuristicNetwork.pth'):
+        model_file =  f'./NeuralNet/{file_name}'
+        return os.path.exists(model_file) 
+        
+        
+    def load_train(file_name='HeuristicNetwork.pth'):
+        model_file =  f'./NeuralNet/{file_name}'
+        if not os.path.exists(model_file):
+            return None
+        checkpoint = torch.load(model_file)
+        model = HeuristicNetwork()
+        optimizer = torch.optim.Adam(model.parameters())
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        epoch = checkpoint['epoch']
+        model.train()
+        return (model,optimizer,epoch)
+        
+    def load_eval(file_name='HeuristicNetwork.pth'):
+        model_file =  f'./NeuralNet/{file_name}'
         if not os.path.exists(model_file):
             return None
         model = HeuristicNetwork()
-        model.load_state_dict(torch.load(model_file))
+        checkpoint = torch.load(model_file)
+        model.load_state_dict(checkpoint['model_state_dict'])
         model.eval()
         return model
     
-    def gameToTorch(game, player):
+    def gameToTorch(game):
         board = numpy.array(numpy.zeros(shape=(3,9,9),dtype=numpy.float32))
         for b in range(0,9):
             coord = g.GameState.boardToCoord(b)
             for i in range(0,3):
                 for j in range(0,3):
-                    if (game.board[b,i,j] == player):
+                    if (game.board[b,i,j] == game.currentTurn):
                         board[0,i+3*coord[0],j+3*coord[1]] = 1
                     elif (game.board[b,i,j] == g.OPEN_VAL):
                         board[2,i+3*coord[0],j+3*coord[1]] = 1
@@ -99,7 +124,7 @@ class HeuristicNetwork(nn.Module):
                 if (game.boardsWon[i,j] == g.OPEN_VAL):
                     if anyBoard:
                         currentBoard[0,i,j] = 1
-                elif (game.boardsWon[i,j] == player):
+                elif (game.boardsWon[i,j] == game.currentTurn):
                     boardsWon[0,i,j] = 1
                 elif (game.boardsWon[i,j] == g.STALEMATE):
                     boardsWon[2,i,j] = 1

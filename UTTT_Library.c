@@ -953,7 +953,7 @@ Coord monteCarloTreeSearch_sf(CGameState game, MCST_Args args, int ** prev_root)
     MonteCarloNode * leaf;
     double result = 0;
     MonteCarloNode ** prev = (MonteCarloNode **) prev_root;
-    MonteCarloNode * pr;
+    
     if (*prev == NULL) {
         root = intializeRoot_sf(&game,&args,game.currentTurn);
         *prev = root;

@@ -136,18 +136,22 @@ while run:
 
             #Find clicked grid
             if game.gameWon == 0:# and game.currentTurn == 1:
+                board_tensor = m.HeuristicNetwork.gameToTorch(game)
+                print(model(board_tensor))
+                
                 gridRow = 9*(y % BOARD_HEIGHT) // SCREEN_HEIGHT
                 gridColumn = 9*(x % BOARD_HEIGHT) // SCREEN_WIDTH 
                 
                 move = game.playTurn(board,gridRow,gridColumn)
 
-                board = m.HeuristicNetwork.gameToTorch(game, g.X_VAL)
-                print(model(board))
+                
 
                 if move != -1:         
                     updateDraw()
                     
     if game.gameWon == 0 and game.currentTurn == 2:
+        board_tensor = m.HeuristicNetwork.gameToTorch(game)
+        print(model(board_tensor))
         
         moveAI = AIPlayer.chooseMove(game)
         move = game.playTurn(moveAI[0],moveAI[1],moveAI[2])

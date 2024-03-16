@@ -3037,10 +3037,11 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 #define SWIGTYPE_p_f_p_CGameState_p_HeuristicVal__int swig_types[13]
 #define SWIGTYPE_p_int swig_types[14]
 #define SWIGTYPE_p_p_MonteCarloNode swig_types[15]
-#define SWIGTYPE_p_random_data swig_types[16]
-#define SWIGTYPE_p_void swig_types[17]
-static swig_type_info *swig_types[19];
-static swig_module_info swig_module = {swig_types, 18, 0, 0, 0, 0};
+#define SWIGTYPE_p_p_int swig_types[16]
+#define SWIGTYPE_p_random_data swig_types[17]
+#define SWIGTYPE_p_void swig_types[18]
+static swig_type_info *swig_types[20];
+static swig_module_info swig_module = {swig_types, 19, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -3145,9 +3146,7 @@ namespace swig {
 }
 
 
-    extern "C" {
-        #include "boardCount.h"
-    }
+    #include "boardCount.h"
 
 
 SWIGINTERNINLINE PyObject*
@@ -6076,58 +6075,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_MonteCarloNode_ID_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  MonteCarloNode *arg1 = (MonteCarloNode *) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:MonteCarloNode_ID_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MonteCarloNode, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MonteCarloNode_ID_set" "', argument " "1"" of type '" "MonteCarloNode *""'"); 
-  }
-  arg1 = reinterpret_cast< MonteCarloNode * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "MonteCarloNode_ID_set" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  if (arg1) (arg1)->ID = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_MonteCarloNode_ID_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  MonteCarloNode *arg1 = (MonteCarloNode *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:MonteCarloNode_ID_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MonteCarloNode, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "MonteCarloNode_ID_get" "', argument " "1"" of type '" "MonteCarloNode *""'"); 
-  }
-  arg1 = reinterpret_cast< MonteCarloNode * >(argp1);
-  result = (int) ((arg1)->ID);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_new_MonteCarloNode(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   MonteCarloNode *result = 0 ;
@@ -7130,6 +7077,37 @@ SWIGINTERN PyObject *_wrap_revertTurn(PyObject *SWIGUNUSEDPARM(self), PyObject *
   arg5 = static_cast< unsigned char >(val5);
   revertTurn(arg1,arg2,arg3,arg4,arg5);
   resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_isSameBoard(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  CGameState *arg1 = (CGameState *) 0 ;
+  CGameState *arg2 = (CGameState *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:isSameBoard",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CGameState, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "isSameBoard" "', argument " "1"" of type '" "CGameState *""'"); 
+  }
+  arg1 = reinterpret_cast< CGameState * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_CGameState, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "isSameBoard" "', argument " "2"" of type '" "CGameState *""'"); 
+  }
+  arg2 = reinterpret_cast< CGameState * >(argp2);
+  result = (bool)isSameBoard(arg1,arg2);
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
   return resultobj;
 fail:
   return NULL;
@@ -8661,49 +8639,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_getID(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  CGameState *arg1 = (CGameState *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  int result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:getID",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CGameState, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "getID" "', argument " "1"" of type '" "CGameState *""'"); 
-  }
-  arg1 = reinterpret_cast< CGameState * >(argp1);
-  result = (int)getID(arg1);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_setID(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  MonteCarloNode *arg1 = (MonteCarloNode *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:setID",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MonteCarloNode, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "setID" "', argument " "1"" of type '" "MonteCarloNode *""'"); 
-  }
-  arg1 = reinterpret_cast< MonteCarloNode * >(argp1);
-  setID(arg1);
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_updateRoot(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   CGameState *arg1 = (CGameState *) 0 ;
@@ -8737,11 +8672,11 @@ fail:
 
 SWIGINTERN PyObject *_wrap_initialize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  MonteCarloNode **result = 0 ;
+  int **result = 0 ;
   
   if (!PyArg_ParseTuple(args,(char *)":initialize")) SWIG_fail;
-  result = (MonteCarloNode **)initialize();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p_MonteCarloNode, 0 |  0 );
+  result = (int **)initialize();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p_int, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -8750,17 +8685,17 @@ fail:
 
 SWIGINTERN PyObject *_wrap_freeTree(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  MonteCarloNode **arg1 = (MonteCarloNode **) 0 ;
+  int **arg1 = (int **) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
   
   if (!PyArg_ParseTuple(args,(char *)"O:freeTree",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_p_MonteCarloNode, 0 |  0 );
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_p_int, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "freeTree" "', argument " "1"" of type '" "MonteCarloNode **""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "freeTree" "', argument " "1"" of type '" "int **""'"); 
   }
-  arg1 = reinterpret_cast< MonteCarloNode ** >(argp1);
+  arg1 = reinterpret_cast< int ** >(argp1);
   freeTree(arg1);
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -8803,7 +8738,7 @@ SWIGINTERN PyObject *_wrap_monteCarloTreeSearch_sf(PyObject *SWIGUNUSEDPARM(self
   PyObject *resultobj = 0;
   CGameState arg1 ;
   MCST_Args arg2 ;
-  MonteCarloNode **arg3 = (MonteCarloNode **) 0 ;
+  int **arg3 = (int **) 0 ;
   void *argp1 ;
   int res1 = 0 ;
   void *argp2 ;
@@ -8842,11 +8777,11 @@ SWIGINTERN PyObject *_wrap_monteCarloTreeSearch_sf(PyObject *SWIGUNUSEDPARM(self
       if (SWIG_IsNewObj(res2)) delete temp;
     }
   }
-  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_p_MonteCarloNode, 0 |  0 );
+  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_p_int, 0 |  0 );
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "monteCarloTreeSearch_sf" "', argument " "3"" of type '" "MonteCarloNode **""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "monteCarloTreeSearch_sf" "', argument " "3"" of type '" "int **""'"); 
   }
-  arg3 = reinterpret_cast< MonteCarloNode ** >(argp3);
+  arg3 = reinterpret_cast< int ** >(argp3);
   result = monteCarloTreeSearch_sf(arg1,arg2,arg3);
   resultobj = SWIG_NewPointerObj((new Coord(static_cast< const Coord& >(result))), SWIGTYPE_p_Coord, SWIG_POINTER_OWN |  0 );
   return resultobj;
@@ -8857,46 +8792,69 @@ fail:
 
 SWIGINTERN PyObject *_wrap_intializeRoot_sf(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  MonteCarloNode *arg1 = (MonteCarloNode *) 0 ;
-  CGameState *arg2 = (CGameState *) 0 ;
-  MCST_Args *arg3 = (MCST_Args *) 0 ;
-  unsigned char arg4 ;
+  CGameState *arg1 = (CGameState *) 0 ;
+  MCST_Args *arg2 = (MCST_Args *) 0 ;
+  unsigned char arg3 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  unsigned char val4 ;
-  int ecode4 = 0 ;
+  unsigned char val3 ;
+  int ecode3 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
-  PyObject * obj3 = 0 ;
+  MonteCarloNode *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:intializeRoot_sf",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_MonteCarloNode, 0 |  0 );
+  if (!PyArg_ParseTuple(args,(char *)"OOO:intializeRoot_sf",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CGameState, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "intializeRoot_sf" "', argument " "1"" of type '" "MonteCarloNode *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "intializeRoot_sf" "', argument " "1"" of type '" "CGameState *""'"); 
   }
-  arg1 = reinterpret_cast< MonteCarloNode * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_CGameState, 0 |  0 );
+  arg1 = reinterpret_cast< CGameState * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_MCST_Args, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "intializeRoot_sf" "', argument " "2"" of type '" "CGameState *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "intializeRoot_sf" "', argument " "2"" of type '" "MCST_Args *""'"); 
   }
-  arg2 = reinterpret_cast< CGameState * >(argp2);
-  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_MCST_Args, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "intializeRoot_sf" "', argument " "3"" of type '" "MCST_Args *""'"); 
-  }
-  arg3 = reinterpret_cast< MCST_Args * >(argp3);
-  ecode4 = SWIG_AsVal_unsigned_SS_char(obj3, &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "intializeRoot_sf" "', argument " "4"" of type '" "unsigned char""'");
+  arg2 = reinterpret_cast< MCST_Args * >(argp2);
+  ecode3 = SWIG_AsVal_unsigned_SS_char(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "intializeRoot_sf" "', argument " "3"" of type '" "unsigned char""'");
   } 
-  arg4 = static_cast< unsigned char >(val4);
-  intializeRoot_sf(arg1,arg2,arg3,arg4);
-  resultobj = SWIG_Py_Void();
+  arg3 = static_cast< unsigned char >(val3);
+  result = (MonteCarloNode *)intializeRoot_sf(arg1,arg2,arg3);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MonteCarloNode, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_getNewRoot(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  CGameState *arg1 = (CGameState *) 0 ;
+  MonteCarloNode **arg2 = (MonteCarloNode **) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  MonteCarloNode *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:getNewRoot",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CGameState, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "getNewRoot" "', argument " "1"" of type '" "CGameState *""'"); 
+  }
+  arg1 = reinterpret_cast< CGameState * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_p_MonteCarloNode, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "getNewRoot" "', argument " "2"" of type '" "MonteCarloNode **""'"); 
+  }
+  arg2 = reinterpret_cast< MonteCarloNode ** >(argp2);
+  result = (MonteCarloNode *)getNewRoot(arg1,arg2);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MonteCarloNode, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -9008,8 +8966,6 @@ static PyMethodDef SwigMethods[] = {
 	 { "MonteCarloNode_T_get", _wrap_MonteCarloNode_T_get, METH_VARARGS, NULL},
 	 { "MonteCarloNode_heuristic_set", _wrap_MonteCarloNode_heuristic_set, METH_VARARGS, NULL},
 	 { "MonteCarloNode_heuristic_get", _wrap_MonteCarloNode_heuristic_get, METH_VARARGS, NULL},
-	 { "MonteCarloNode_ID_set", _wrap_MonteCarloNode_ID_set, METH_VARARGS, NULL},
-	 { "MonteCarloNode_ID_get", _wrap_MonteCarloNode_ID_get, METH_VARARGS, NULL},
 	 { "new_MonteCarloNode", _wrap_new_MonteCarloNode, METH_VARARGS, NULL},
 	 { "delete_MonteCarloNode", _wrap_delete_MonteCarloNode, METH_VARARGS, NULL},
 	 { "MonteCarloNode_swigregister", MonteCarloNode_swigregister, METH_VARARGS, NULL},
@@ -9049,6 +9005,7 @@ static PyMethodDef SwigMethods[] = {
 	 { "chooseMoveSingleGrid", _wrap_chooseMoveSingleGrid, METH_VARARGS, NULL},
 	 { "getMoves", _wrap_getMoves, METH_VARARGS, NULL},
 	 { "revertTurn", _wrap_revertTurn, METH_VARARGS, NULL},
+	 { "isSameBoard", _wrap_isSameBoard, METH_VARARGS, NULL},
 	 { "chooseMoveListSingleGrid", _wrap_chooseMoveListSingleGrid, METH_VARARGS, NULL},
 	 { "chooseMoveListFullBoard", _wrap_chooseMoveListFullBoard, METH_VARARGS, NULL},
 	 { "getMovesList", _wrap_getMovesList, METH_VARARGS, NULL},
@@ -9090,14 +9047,13 @@ static PyMethodDef SwigMethods[] = {
 	 { "chooseWinningMove_thread", _wrap_chooseWinningMove_thread, METH_VARARGS, NULL},
 	 { "chooseRandomMove_thread", _wrap_chooseRandomMove_thread, METH_VARARGS, NULL},
 	 { "monteCarloHeuristic_thread", _wrap_monteCarloHeuristic_thread, METH_VARARGS, NULL},
-	 { "getID", _wrap_getID, METH_VARARGS, NULL},
-	 { "setID", _wrap_setID, METH_VARARGS, NULL},
 	 { "updateRoot", _wrap_updateRoot, METH_VARARGS, NULL},
 	 { "initialize", _wrap_initialize, METH_VARARGS, NULL},
 	 { "freeTree", _wrap_freeTree, METH_VARARGS, NULL},
 	 { "freeUnused", _wrap_freeUnused, METH_VARARGS, NULL},
 	 { "monteCarloTreeSearch_sf", _wrap_monteCarloTreeSearch_sf, METH_VARARGS, NULL},
 	 { "intializeRoot_sf", _wrap_intializeRoot_sf, METH_VARARGS, NULL},
+	 { "getNewRoot", _wrap_getNewRoot, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };
 
@@ -9120,6 +9076,7 @@ static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_f_p_CGameState_p_HeuristicVal__int = {"_p_f_p_CGameState_p_HeuristicVal__int", "int (*)(CGameState *,HeuristicVal *)", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_int = {"_p_int", "int *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_MonteCarloNode = {"_p_p_MonteCarloNode", "MonteCarloNode **", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_p_int = {"_p_p_int", "int **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_random_data = {"_p_random_data", "random_data *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_void = {"_p_void", "void *", 0, 0, (void*)0, 0};
 
@@ -9140,6 +9097,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_f_p_CGameState_p_HeuristicVal__int,
   &_swigt__p_int,
   &_swigt__p_p_MonteCarloNode,
+  &_swigt__p_p_int,
   &_swigt__p_random_data,
   &_swigt__p_void,
 };
@@ -9160,6 +9118,7 @@ static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0,
 static swig_cast_info _swigc__p_f_p_CGameState_p_HeuristicVal__int[] = {  {&_swigt__p_f_p_CGameState_p_HeuristicVal__int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_int[] = {  {&_swigt__p_int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_MonteCarloNode[] = {  {&_swigt__p_p_MonteCarloNode, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_p_int[] = {  {&_swigt__p_p_int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_random_data[] = {  {&_swigt__p_random_data, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0, 0}};
 
@@ -9180,6 +9139,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_f_p_CGameState_p_HeuristicVal__int,
   _swigc__p_int,
   _swigc__p_p_MonteCarloNode,
+  _swigc__p_p_int,
   _swigc__p_random_data,
   _swigc__p_void,
 };

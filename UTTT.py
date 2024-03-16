@@ -409,10 +409,6 @@ class MonteCarloNode(_object):
     __swig_getmethods__["heuristic"] = _UTTT.MonteCarloNode_heuristic_get
     if _newclass:
         heuristic = _swig_property(_UTTT.MonteCarloNode_heuristic_get, _UTTT.MonteCarloNode_heuristic_set)
-    __swig_setmethods__["ID"] = _UTTT.MonteCarloNode_ID_set
-    __swig_getmethods__["ID"] = _UTTT.MonteCarloNode_ID_get
-    if _newclass:
-        ID = _swig_property(_UTTT.MonteCarloNode_ID_get, _UTTT.MonteCarloNode_ID_set)
 
     def __init__(self):
         this = _UTTT.new_MonteCarloNode()
@@ -555,6 +551,10 @@ getMoves = _UTTT.getMoves
 def revertTurn(game, board, row, column, previousBoard):
     return _UTTT.revertTurn(game, board, row, column, previousBoard)
 revertTurn = _UTTT.revertTurn
+
+def isSameBoard(game1, game2):
+    return _UTTT.isSameBoard(game1, game2)
+isSameBoard = _UTTT.isSameBoard
 
 def chooseMoveListSingleGrid(game, moves, board):
     return _UTTT.chooseMoveListSingleGrid(game, moves, board)
@@ -720,14 +720,6 @@ def monteCarloHeuristic_thread(args):
     return _UTTT.monteCarloHeuristic_thread(args)
 monteCarloHeuristic_thread = _UTTT.monteCarloHeuristic_thread
 
-def getID(game):
-    return _UTTT.getID(game)
-getID = _UTTT.getID
-
-def setID(node):
-    return _UTTT.setID(node)
-setID = _UTTT.setID
-
 def updateRoot(game, prev_root):
     return _UTTT.updateRoot(game, prev_root)
 updateRoot = _UTTT.updateRoot
@@ -748,9 +740,13 @@ def monteCarloTreeSearch_sf(game, args, prev_root):
     return _UTTT.monteCarloTreeSearch_sf(game, args, prev_root)
 monteCarloTreeSearch_sf = _UTTT.monteCarloTreeSearch_sf
 
-def intializeRoot_sf(root, game, args, player):
-    return _UTTT.intializeRoot_sf(root, game, args, player)
+def intializeRoot_sf(game, args, player):
+    return _UTTT.intializeRoot_sf(game, args, player)
 intializeRoot_sf = _UTTT.intializeRoot_sf
+
+def getNewRoot(game, prev_root):
+    return _UTTT.getNewRoot(game, prev_root)
+getNewRoot = _UTTT.getNewRoot
 # This file is compatible with both classic and new-style classes.
 
 
