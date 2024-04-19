@@ -25,6 +25,7 @@
 #define STALEMATE 3
 #define GAME_WON 1
 #define NO_WIN 0
+#define EMPTY_VAL 0
 #define ROW_DIMENSION 3
 #define COL_DIMENSION ROW_DIMENSION
 #define VICTORY_VALUE 1000000

@@ -4,6 +4,10 @@ import Heuristics as h
 
 import Model as m
 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
 # Pygame UI is based on https://github.com/russs123/TicTacToe/blob/master/tictactoe.py
 
 # IMPORTANT: Run Xlaunch when testing in WSL with Disable Access Control
@@ -103,8 +107,13 @@ pygame.display.update()
 click = False
 mousePosition = []
 
-model = m.HeuristicNetwork()
+#model = m.HeuristicNetwork()
 
+model = m.HeuristicNetwork.load_eval(file_name="HeuristicNetwork_Adam.pth")
+
+boards = []
+boards_won = []
+playable_boards = []
 
 # Run until user quits
 run = True 
@@ -136,8 +145,14 @@ while run:
 
             #Find clicked grid
             if game.gameWon == 0:# and game.currentTurn == 1:
-                board_tensor = m.HeuristicNetwork.gameToTorch(game)
-                print(model(board_tensor))
+                board_tensor = m.HeuristicNetwork.gameToTorch_dataset(game)
+                #print(game.currentTurn,model(board_tensor))
+                
+                boards = [board_tensor[0],]
+                boards_won = [board_tensor[1],]
+                playable_boards = [board_tensor[2],]
+                
+                print(game.currentTurn,model(board_tensor))
                 
                 gridRow = 9*(y % BOARD_HEIGHT) // SCREEN_HEIGHT
                 gridColumn = 9*(x % BOARD_HEIGHT) // SCREEN_WIDTH 
@@ -150,11 +165,28 @@ while run:
                     updateDraw()
                     
     if game.gameWon == 0 and game.currentTurn == 2:
-        board_tensor = m.HeuristicNetwork.gameToTorch(game)
-        print(model(board_tensor))
+        
+        board_tensor = m.HeuristicNetwork.gameToTorch_dataset(game)
+                
+        boards = [board_tensor[0],]
+        boards_won = [board_tensor[1],]
+        playable_boards = [board_tensor[2],]
+        
+        print(game.currentTurn,model(board_tensor))
+        
+        #print(game.currentTurn,model(board_tensor))
+        
+        #boards.append(board_tensor[0])
+        boards_won.append(board_tensor[1])
+        #playable_boards.append(board_tensor[2])
+        #t = (torch.concat(boards),torch.concat(boards_won),torch.concat(playable_boards))
+        #sprint(model(t))
         
         moveAI = AIPlayer.chooseMove(game)
         move = game.playTurn(moveAI[0],moveAI[1],moveAI[2])
+        
+        
+        
         if move != -1:                    
             updateDraw()
     

@@ -67,11 +67,11 @@ def simulateGames(AI_1:AI.TicTacToeAI, AI_2:AI.TicTacToeAI, gameNum=int):
 #monteAI_no_multiplier = AI.MonteCarloST(2000,verbose=True,multiplier=1.0)
 
 
-monteAI_sf = AI.MonteCarloST_SF(500)
-monteAI_sf2 = AI.MonteCarloST_SF(500)
+#monteAI_sf = AI.MonteCarloST_SF(500)
+#monteAI_sf2 = AI.MonteCarloST_SF(500)
 
-monte_heur = AI.ChooseMinimax(3,h.MonteCarloHeuristic(maxRuns=600))
-simulateGames(monteAI_sf,monteAI_sf2,10)
+#monte_heur = AI.ChooseMinimax(3,h.MonteCarloHeuristic(maxRuns=600))
+#simulateGames(monteAI_sf,monteAI_sf2,10)
 #
 # for ai in monte_heur:
 #     simulateGames(monteAI_sf,ai,1000)
@@ -92,4 +92,21 @@ simulateGames(monteAI_sf,monteAI_sf2,10)
 # minimax1 = AI.ChooseMinimax(4,h.StaticHeuristic())
 # minimax2 = AI.ChooseMinimax(4,h.PlayableBoardHeuristic())
 
-# simulateGames(minimax1,minimax2,1000)        
+# simulateGames(minimax1,minimax2,1000)   
+
+monteCarlo = AI.MonteCarloST(4000)
+monteCarlo_SF = AI.MonteCarloST_SF(4000)
+
+minimax = [AI.ChooseMinimax(1,h.PlayableBoardHeuristic()),
+           AI.ChooseMinimax(2,h.PlayableBoardHeuristic()),
+           AI.ChooseMinimax(3,h.PlayableBoardHeuristic()),
+           AI.ChooseMinimax(4,h.PlayableBoardHeuristic()),
+           AI.ChooseMinimax(5,h.PlayableBoardHeuristic()),
+           AI.ChooseMinimax(6,h.PlayableBoardHeuristic())]
+
+#for i in range(0,len(minimax)):
+    #simulateGames(monteCarlo,minimax[i],1000)
+#    simulateGames(monteCarlo_SF,minimax[i],1000)
+
+monteCarlo = AI.MonteCarloST_SF(10000)
+simulateGames(monteCarlo,minimax[2],1000)

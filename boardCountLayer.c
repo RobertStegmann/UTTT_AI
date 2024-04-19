@@ -28,7 +28,7 @@ int main(int argc, char * argv[])
         pthread_join(topcentre_id, NULL);
         pthread_join(centre_id, NULL);
         time_t end = time(NULL);
-        printf("Execution time in seconds: %d\n",(end-begin));
+        printf("Execution time in seconds: %ld\n",(end-begin));
     } else {
         printf("Usage: ./boardCountLayer [number of layers]\n");
     }

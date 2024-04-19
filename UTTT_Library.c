@@ -239,7 +239,7 @@ int minimax(CGameState * game, int depth, int alpha, int beta, bool maximize, in
     int a = alpha;
     int b = beta;
     Coord * possibleMoves;
-    unsigned char playableBoard;
+    CGameState tempGame;
     if (game->gameWon != NO_WIN) {
         if (game->gameWon == GAME_WON) {
             if (game->currentTurn == X_VAL) {
@@ -254,14 +254,13 @@ int minimax(CGameState * game, int depth, int alpha, int beta, bool maximize, in
         return heuristic(game,val);
     }
     possibleMoves = getMoves(game);
-    playableBoard = game->currentBoard;
     if (maximize) {
         bestEval = -VICTORY_VALUE;
         for (int i = 0; possibleMoves[i].board != 10; i++)
         {
-            playTurn(game, possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column);
-            eval = minimax(game,depth-1,a,b,false,heuristic,val);
-            revertTurn(game,possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column,playableBoard);
+            copyCGameState(&tempGame,game);
+            playTurn(&tempGame, possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column);
+            eval = minimax(&tempGame,depth-1,a,b,false,heuristic,val);
             bestEval = MAX(bestEval,eval);
             a = MAX(a,eval);
             if (b <= a) {
@@ -273,9 +272,9 @@ int minimax(CGameState * game, int depth, int alpha, int beta, bool maximize, in
     
         for (int i = 0; possibleMoves[i].board != 10; i++)
         {
-            playTurn(game, possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column);
-            eval = minimax(game,depth-1,a,b,true,heuristic,val);
-            revertTurn(game,possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column,playableBoard);
+            copyCGameState(&tempGame,game);
+            playTurn(&tempGame, possibleMoves[i].board, possibleMoves[i].row, possibleMoves[i].column);
+            eval = minimax(&tempGame,depth-1,a,b,true,heuristic,val);
             bestEval = MIN(bestEval,eval);
             b = MIN(b,eval);
             if (b <= a) {
